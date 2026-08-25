@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Estudos de Piano</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --border-color: #334155;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        nav button {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        nav button.active {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border-color: var(--accent-color);
+        }
+        .tab-content {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .btn-action {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Painel de Piano</h1>
+        <p>Ambiente Modular de Prática</p>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <nav id="nav-tabs">
+        <button class="active" data-action="switch-tab" data-tab="tab-hoje">Aba Hoje</button>
+        <button data-action="switch-tab" data-tab="tab-pecas">Aba Peças</button>
+        <button data-action="switch-tab" data-tab="tab-config">Aba Configurações</button>
+    </nav>
+
+    <!-- Conteúdo das Abas -->
+    <main>
+        <section id="tab-hoje" class="tab-content active">
+            <h2>Sessão de Hoje</h2>
+            <p>O motor prescritivo e os trechos diários aparecerão aqui nas próximas fases.</p>
+            <button class="btn-action" data-action="test-action">Testar Estado</button>
+        </section>
+
+        <section id="tab-pecas" class="tab-content">
+            <h2>Gerenciamento de Repertório</h2>
+            <p>Listagem de peças e matriz dinâmica.</p>
+        </section>
+
+        <section id="tab-config" class="tab-content">
+            <h2>Configurações e Dados</h2>
+            <p>Estado atual salvo no navegador:</p>
+            <pre id="state-debug" style="background:#0f172a; padding:10px; border-radius:6px; overflow-x:auto;"></pre>
+        </section>
+    </main>
+
+    <!-- Carregamento dos Módulos JavaScript -->
+    <script src="state.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
