@@ -1,14 +1,6 @@
 /**
  * sandwichPlayer.js - Controlador do Modo de Prática em Bloco Sanduíche
- * Painel de Estudos de Piano & Acordeon (Versão 3)
- * 
- * Protocolo:
- * - Round 1: Aquisição do Trecho (3 acertos para novo / 5 acertos para vício) + Micro-Replay 10s
- * - Intervalo 1: 90s de Reset Cognitivo (Fundamento Técnico)
- * - Round 2: Reaquisição com Desafio Drop-the-Prompt (Recuperação Ativa)
- * - Intervalo 2: 90s de Reset Cognitivo (Rodízio de Categoria Técnica)
- * - Round 3: Fixação Final & Estabilização
- * - Scorecard Pós-Sessão: Assertividade real % e crédito de XP
+ * Painel de Estudos de Piano & Acordeon (Versão 4)
  */
 
 let swTimerInterval = null;
@@ -20,7 +12,6 @@ class SandwichPlayerClass {
     const state = window.StateManager.getState();
     const activePieces = window.RepertoireManager ? window.RepertoireManager.getActivePieces() : [];
     
-    // Seleciona peça e trecho
     let piece = pieceId ? activePieces.find(p => p.id === pieceId) : activePieces.find(p => !p.isPaused);
     if (!piece && activePieces.length > 0) piece = activePieces[0];
     if (!piece) {
@@ -69,10 +60,8 @@ class SandwichPlayerClass {
     const newSessionHits = sw.sessionHits + 1;
     let xpGain = sw.isPromptDropped ? 3 : 2;
 
-    // Dispara Micro-Offline Replay de 10s
     this.startMicroReplayTimer();
 
-    // Verifica se completou o round atual
     if (newConsecutive >= sw.targetHits) {
       this.completeCurrentRound();
       return;
@@ -99,7 +88,7 @@ class SandwichPlayerClass {
     window.StateManager.setState(prev => ({
       sandwichState: {
         ...prev.sandwichState,
-        consecutiveHits: 0, // Reset a zero em caso de falha motora
+        consecutiveHits: 0,
         roundMisses: prev.sandwichState.roundMisses + 1,
         sessionMisses: prev.sandwichState.sessionMisses + 1
       }
@@ -146,10 +135,8 @@ class SandwichPlayerClass {
     const sw = state.sandwichState;
 
     if (sw.currentRound === 1 || sw.currentRound === 2) {
-      // Inicia intervalo técnico de 90s
       this.startTechnicalInterval();
     } else {
-      // Completou o Round 3 -> Finaliza Sessão Sanduíche
       this.finishSession();
     }
   }
@@ -166,7 +153,7 @@ class SandwichPlayerClass {
         intervalSecondsRemaining: 90,
         lastTechDrawn: techExercise,
         consecutiveHits: 0,
-        isPromptDropped: prev.sandwichState.currentRound === 1 // No Round 2 inicia com prompt dropped
+        isPromptDropped: prev.sandwichState.currentRound === 1
       }
     }), "START_TECH_INTERVAL");
 
@@ -224,20 +211,18 @@ class SandwichPlayerClass {
     const totalAttempts = totalHits + totalMisses;
     const accuracy = totalAttempts > 0 ? Math.round((totalHits / totalAttempts) * 100) : 100;
 
-    // 1. Atualiza o trecho com os novos dados
     if (sw.pieceId && sw.trechoId && window.RepertoireManager) {
       const { trecho } = window.RepertoireManager.getPieceAndTrecho(sw.pieceId, sw.trechoId);
       if (trecho) {
         window.RepertoireManager.updateTrecho(sw.pieceId, sw.trechoId, {
           lifetimeHits: (trecho.lifetimeHits || 0) + totalHits,
           lifetimeAttempts: (trecho.lifetimeAttempts || 0) + totalAttempts,
-          box: Math.max(1, trecho.box || 1) // Promove ao menos para Caixa 1
+          box: Math.max(1, trecho.box || 1)
         });
       }
     }
 
-    // 2. Credita minutos, XP e grava no histórico
-    const practiceMinutes = 12; // Média de tempo da sessão sanduíche
+    const practiceMinutes = 12;
     window.StateManager.setState(prev => ({
       xp: (prev.xp || 0) + 35,
       dailyStats: {
@@ -279,7 +264,6 @@ class SandwichPlayerClass {
 
     const sw = state.sandwichState || {};
 
-    // 1. Tela Inicial (Seletor de Trecho para Iniciar Sanduíche)
     if (!sw.active) {
       const pieces = (state.repertoire && state.repertoire.active) ? state.repertoire.active : [];
       container.innerHTML = `
@@ -310,7 +294,6 @@ class SandwichPlayerClass {
       ? window.RepertoireManager.getPieceAndTrecho(sw.pieceId, sw.trechoId)
       : { piece: { title: "Peça" }, trecho: { label: "Trecho" } };
 
-    // 2. Tela de Intervalo Técnico (90s)
     if (sw.inInterval) {
       const tech = sw.lastTechDrawn || { title: "Escala Fá# Maior", desc: "Padrão Russo", bpm: 60 };
       container.innerHTML = `
@@ -338,7 +321,6 @@ class SandwichPlayerClass {
       return;
     }
 
-    // 3. Tela de Prática do Round Ativo (Rounds 1, 2 e 3)
     const roundTitles = {
       1: "Round 1: Primeira Aquisição",
       2: "Round 2: Reaquisição com Drop-the-Prompt",
@@ -362,7 +344,6 @@ class SandwichPlayerClass {
         Compassos: ${trecho ? trecho.compassos : '1-4'} | Andamento alvo: ${piece ? piece.targetBpm : '60 BPM'}
       </p>
 
-      <!-- Área da Partitura / Desafio Drop-the-Prompt -->
       <div class="sheet-container ${sw.isPromptDropped ? 'sheet-hidden' : ''}">
         ${sw.isPromptDropped ? `
           <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px;">🙈 Partitura Oculta (Drop-the-Prompt)</div>
@@ -378,13 +359,11 @@ class SandwichPlayerClass {
         `}
       </div>
 
-      <!-- Barra de Micro-Replay 10s -->
       <div class="replay-bar-wrap">
         <div id="microReplayBar" class="replay-bar"></div>
       </div>
       <div id="microReplayText" style="font-size: 0.72rem; color: var(--text-muted); text-align: center; min-height: 16px;"></div>
 
-      <!-- Contador de Acertos Consecutivos -->
       <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; margin: 12px 0;">
         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Acertos Consecutivos no Round</div>
         <div style="font-size: 2rem; font-weight: 800; color: ${sw.consecutiveHits > 0 ? 'var(--accent2)' : '#fff'};">
@@ -392,7 +371,6 @@ class SandwichPlayerClass {
         </div>
       </div>
 
-      <!-- Botões de Ação do Estudante -->
       <div style="display: flex; gap: 8px;">
         <button class="btn-audit btn-audit-hit" style="padding: 14px;" data-action="sw-hit">
           ✅ Execução Limpa (+${sw.isPromptDropped ? '3' : '2'} XP)
