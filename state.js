@@ -1,10 +1,10 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 0)
+ * Painel de Estudos de Piano & Acordeon (Versão 1)
  */
 
 const DEFAULT_STATE = {
-  version: "v0.1.0",
+  version: "v1.0.0",
   lastSaved: null,
   activeTab: "hoje",
   xp: 0,
@@ -23,7 +23,7 @@ const DEFAULT_STATE = {
   },
   weeklyGoals: {
     targetMinutes: 250,
-    repertoireFocus: "Consolidar trechos de Passo 1 e Passo 2",
+    repertoireFocus: "Consolidar microblocos de Passo 1 e Passo 2",
     technicalFocus: "Escalas e Arpejos fundamentais",
     readingTargetPieces: 5
   },
@@ -49,7 +49,7 @@ const DEFAULT_STATE = {
     inProgress: false,
     activePieceId: null,
     activeTrechoId: null,
-    mode: null, // 'guided', 'sandwich', 'manual'
+    mode: null,
     startTime: null,
     elapsedSeconds: 0
   }
@@ -57,9 +57,6 @@ const DEFAULT_STATE = {
 
 const STORAGE_KEY = "painel_zero_state";
 
-/**
- * Mesclagem recursiva defensiva para prevenir perda de propriedades
- */
 function deepMerge(target, source) {
   if (!source || typeof source !== "object") return target;
   const output = Object.assign({}, target);
@@ -85,9 +82,6 @@ class StateManagerClass {
     this._initialized = false;
   }
 
-  /**
-   * Inicializa o estado carregando do localStorage ou usando defaults
-   */
   init() {
     if (this._initialized) return this._state;
 
@@ -109,9 +103,6 @@ class StateManagerClass {
     return this._state;
   }
 
-  /**
-   * Reinicia acumuladores diários caso a data mude
-   */
   _checkDailyReset() {
     const today = new Date().toISOString().split("T")[0];
     if (this._state.dailyStats && this._state.dailyStats.date !== today) {
@@ -127,9 +118,6 @@ class StateManagerClass {
     }
   }
 
-  /**
-   * Migração de dados de versões anteriores caso existam
-   */
   _migrateLegacyStorage() {
     const legacyV23 = localStorage.getItem("painelPiano_V23");
     const legacyV22 = localStorage.getItem("painelPianoV22");
@@ -147,9 +135,6 @@ class StateManagerClass {
     }
   }
 
-  /**
-   * Retorna o estado atual
-   */
   getState() {
     if (!this._initialized) {
       this.init();
@@ -157,9 +142,6 @@ class StateManagerClass {
     return this._state;
   }
 
-  /**
-   * Atualiza o estado de forma atômica e notifica os ouvintes
-   */
   setState(updater, actionLabel = "UPDATE_STATE") {
     const currentState = this.getState();
     let updates = {};
@@ -177,9 +159,6 @@ class StateManagerClass {
     this._notify(actionLabel);
   }
 
-  /**
-   * Persiste o estado no localStorage
-   */
   persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this._state));
@@ -188,9 +167,6 @@ class StateManagerClass {
     }
   }
 
-  /**
-   * Inscreve um ouvinte para receber notificações de mudanças de estado
-   */
   subscribe(callback) {
     if (typeof callback === "function") {
       this._listeners.add(callback);
@@ -198,9 +174,6 @@ class StateManagerClass {
     return () => this._listeners.delete(callback);
   }
 
-  /**
-   * Notifica todos os ouvintes inscritos
-   */
   _notify(actionLabel) {
     const currentState = this.getState();
     this._listeners.forEach(listener => {
@@ -212,16 +185,10 @@ class StateManagerClass {
     });
   }
 
-  /**
-   * Exporta o Savegame completo em formato JSON string
-   */
   exportSavegame() {
     return JSON.stringify(this.getState(), null, 2);
   }
 
-  /**
-   * Restaura o estado a partir de um JSON Savegame
-   */
   importSavegame(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
@@ -238,9 +205,6 @@ class StateManagerClass {
     }
   }
 
-  /**
-   * Reseta o estado para os valores padrão
-   */
   resetToDefaults() {
     this._state = Object.assign({}, DEFAULT_STATE);
     this.persist();
@@ -248,6 +212,6 @@ class StateManagerClass {
   }
 }
 
-// Instância global acessível por todos os scripts
+// Instância global
 window.StateManager = new StateManagerClass();
 
