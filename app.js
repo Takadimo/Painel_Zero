@@ -1,5 +1,5 @@
 /**
- * Arquivo principal de controle da UI, Cronômetro, Cadastro, Histórico e Delegação de Eventos
+ * Arquivo principal de controle da UI, Cronômetro, Gestão de Múltiplos Blocos e Histórico
  */
 
 let practiceTimerInterval = null;
@@ -30,15 +30,14 @@ function switchTab(targetTabId) {
     }
 }
 
-// Renderiza dinamicamente as peças, o formulário, o cronômetro e o histórico recente na interface
+// Renderiza dinamicamente a interface com suporte a múltiplos microblocos
 function renderDynamicContent() {
     const repertoire = Repertoire.getRepertoire();
     const currentState = State.getState();
     
-    // Injeta o bloco do Cronômetro, Resumo da Sessão e Trechos na Aba Hoje
+    // Aba Hoje
     const hojeContainer = document.getElementById('trechos-hoje-container');
     if (hojeContainer) {
-        // Conta quantas avaliações foram feitas nesta sessão (baseado no histórico)
         let totalAvaliacoesSessao = 0;
         if (currentState.history) {
             Object.values(currentState.history).forEach(arrayAvaliacoes => {
@@ -62,22 +61,30 @@ function renderDynamicContent() {
                     <button class="btn-action" data-action="reset-timer" style="background-color: #64748b; margin-left: 10px; padding: 10px 20px; font-size: 1em; border: none; border-radius: 6px; color: white; cursor: pointer;">Zerar</button>
                 </div>
             </div>
-            <h3 style="color: #f8fafc; margin-top: 20px;">Trechos Ativos para Estudo</h3>
+            <h3 style="color: #f8fafc; margin-top: 20px;">Matriz de Microblocos Ativos</h3>
         `;
 
         if (repertoire.length === 0) {
-            hojeContainer.innerHTML = timerHtml + '<p style="color: #94a3b8;">Nenhum repertório cadastrado na matriz.</p>';
+            hojeContainer.innerHTML = timerHtml + '<p style="color: #94a3b8;">Nenhum repertório cadastrado.</p>';
         } else {
             let html = timerHtml;
             repertoire.forEach(piece => {
                 if (piece.blocks && Array.isArray(piece.blocks)) {
                     piece.blocks.forEach(block => {
+                        let statusColor = '#38bdf8';
+                        if (block.status === 'Consolidado') statusColor = '#22c55e';
+                        if (block.status === 'Em Estudo') statusColor = '#f59e0b';
+
                         html += `
-                            <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                                <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title} <span style="font-size: 0.8em; color: #94a3b8;">(${piece.composer})</span></h4>
-                                <p style="margin: 5px 0; color: #cbd5e1;">Compassos: <strong>${block.compass}</strong> | Tipo: <em>${block.type}</em></p>
-                                <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="acerto" style="background-color: #0284c7; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Acertei / Avançar</button>
-                                <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="erro" style="background-color: #ef4444; margin-left: 10px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Precisa Atenção</button>
+                            <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h4 style="margin: 0 0 4px 0; color: #38bdf8;">${piece.title} <span style="font-size: 0.8em; color: #94a3b8;">(${piece.composer})</span></h4>
+                                    <p style="margin: 0; color: #cbd5e1;">Compassos: <strong>${block.compass}</strong> | Status: <span style="color: ${statusColor}; font-weight: bold;">${block.status}</span></p>
+                                </div>
+                                <div>
+                                    <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="acerto" style="background-color: #0284c7; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Acertei / Avançar</button>
+                                    <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="erro" style="background-color: #ef4444; margin-left: 8px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Precisa Atenção</button>
+                                </div>
                             </div>
                         `;
                     });
@@ -87,7 +94,7 @@ function renderDynamicContent() {
         }
     }
 
-    // Renderiza na Aba Peças
+    // Aba Peças (Gerenciamento completo e adição de novos microblocos)
     const pecasContainer = document.getElementById('lista-pecas-container');
     if (pecasContainer) {
         let formHtml = `
@@ -103,13 +110,13 @@ function renderDynamicContent() {
                         <input type="text" id="piece-composer" required placeholder="Ex: J. S. Bach" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
                     </div>
                     <div>
-                        <label style="display: block; color: #cbd5e1; font-size: 0.9em; margin-bottom: 4px;">Compassos do Microbloco:</label>
-                        <input type="text" id="piece-compass" required placeholder="Ex: 1-8" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
+                        <label style="display: block; color: #cbd5e1; font-size: 0.9em; margin-bottom: 4px;">Compassos do 1º Microbloco:</label>
+                        <input type="text" id="piece-compass" required placeholder="Ex: 1-4" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
                     </div>
-                    <button type="submit" class="btn-action" data-action="submit-new-piece" style="background-color: #22c55e; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 5px;">Salvar na Matriz</button>
+                    <button type="submit" class="btn-action" style="background-color: #22c55e; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 5px;">Salvar Peça na Matriz</button>
                 </form>
             </div>
-            <h3 style="color: #f8fafc; margin-bottom: 15px;">Repertório Cadastrado</h3>
+            <h3 style="color: #f8fafc; margin-bottom: 15px;">Repertório e Blocos Cadastrados</h3>
         `;
 
         let listHtml = formHtml;
@@ -119,11 +126,22 @@ function renderDynamicContent() {
             repertoire.forEach(piece => {
                 listHtml += `
                     <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title}</h4>
-                        <p style="margin: 0 0 10px 0; color: #94a3b8;">Compositor: ${piece.composer}</p>
-                        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1;">
-                            ${piece.blocks && piece.blocks.map(b => `<li>Compassos ${b.compass} (${b.type}) - Status: <strong>${b.status}</strong></li>`).join('')}
-                        </ul>
+                        <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title} <span style="font-size: 0.8em; color: #94a3b8;">(${piece.composer})</span></h4>
+                        <div style="margin-top: 10px; margin-bottom: 15px;">
+                            <strong style="font-size: 0.9em; color: #cbd5e1;">Microblocos:</strong>
+                            <ul style="margin: 5px 0 0 0; padding-left: 20px; color: #94a3b8;">
+                                ${piece.blocks && piece.blocks.map(b => `
+                                    <li style="margin-bottom: 4px;">
+                                        Compassos <strong>${b.compass}</strong> (${b.type}) - Status: <span style="color: #38bdf8;">${b.status}</span>
+                                        <button class="btn-action" data-action="cycle-status" data-piece-id="${piece.id}" data-block-id="${b.id}" style="margin-left: 10px; background: #334155; border: none; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; cursor: pointer;" title="Alterar Status">Mudar Status</button>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="new-compass-${piece.id}" placeholder="Novo bloco (ex: 5-8)" style="padding: 6px; border-radius: 4px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 0.9em; width: 140px;" />
+                            <button class="btn-action" data-action="add-block" data-piece-id="${piece.id}" style="background-color: #0284c7; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 0.9em;">+ Adicionar Bloco</button>
+                        </div>
                     </div>
                 `;
             });
@@ -132,7 +150,7 @@ function renderDynamicContent() {
     }
 }
 
-// Atualiza o painel de debug e histórico na aba de configurações
+// Painel de Debug na Aba Config
 function updateDebugView() {
     const debugPre = document.getElementById('state-debug');
     if (debugPre) {
@@ -140,7 +158,7 @@ function updateDebugView() {
     }
 }
 
-// Gerenciamento do Cronômetro em Segundo Plano
+// Motor do Cronômetro
 function setupTimerEngine() {
     if (practiceTimerInterval) clearInterval(practiceTimerInterval);
     
@@ -158,12 +176,14 @@ function setupTimerEngine() {
     }, 1000);
 }
 
-// DELEGAÇÃO GLOBAL DE EVENTOS
+// Delegação Global de Eventos
 document.addEventListener('click', (event) => {
     const target = event.target.closest('[data-action]');
     if (!target) return;
 
     const action = target.getAttribute('data-action');
+    const pieceId = target.getAttribute('data-piece-id');
+    const blockId = target.getAttribute('data-block-id');
 
     switch (action) {
         case 'switch-tab':
@@ -175,19 +195,53 @@ document.addEventListener('click', (event) => {
             break;
 
         case 'evaluate-block':
-            const pieceId = target.getAttribute('data-piece-id');
-            const blockId = target.getAttribute('data-block-id');
             const result = target.getAttribute('data-result');
-            
             State.updateState(state => {
                 if (!state.history) state.history = {};
                 const timestamp = new Date().toISOString();
                 if (!state.history[timestamp]) state.history[timestamp] = [];
                 state.history[timestamp].push({ pieceId, blockId, result });
+
+                // Atualiza o status do bloco baseado na avaliação
+                const piece = state.repertoire.find(p => p.id === pieceId);
+                if (piece && piece.blocks) {
+                    const block = piece.blocks.find(b => b.id === blockId);
+                    if (block) {
+                        block.status = result === 'acerto' ? 'Consolidado' : 'Em Estudo';
+                    }
+                }
             });
-            
-            // Atualiza a visualização caso esteja na aba ativa
             renderDynamicContent();
+            break;
+
+        case 'add-block':
+            const inputField = document.getElementById(`new-compass-${pieceId}`);
+            if (inputField && inputField.value.trim()) {
+                const compassVal = inputField.value.trim();
+                const newBlockId = 'b_' + Date.now();
+                Repertoire.addBlockToPiece(pieceId, {
+                    id: newBlockId,
+                    compass: compassVal,
+                    type: "Microbloco",
+                    status: "Novo"
+                });
+                renderDynamicContent();
+            }
+            break;
+
+        case 'cycle-status':
+            const repertoire = Repertoire.getRepertoire();
+            const piece = repertoire.find(p => p.id === pieceId);
+            if (piece && piece.blocks) {
+                const block = piece.blocks.find(b => b.id === blockId);
+                if (block) {
+                    const statuses = ['Novo', 'Em Estudo', 'Consolidado'];
+                    const currentIndex = statuses.indexOf(block.status);
+                    const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+                    Repertoire.updateBlockStatus(pieceId, blockId, nextStatus);
+                    renderDynamicContent();
+                }
+            }
             break;
 
         case 'toggle-timer':
@@ -206,13 +260,10 @@ document.addEventListener('click', (event) => {
                 renderDynamicContent();
             }
             break;
-
-        default:
-            console.warn(`Ação desconhecida: ${action}`);
     }
 });
 
-// Intercepta o envio do formulário de nova peça
+// Intercepta cadastro de nova peça
 document.addEventListener('submit', (event) => {
     if (event.target && event.target.id === 'form-add-piece') {
         event.preventDefault();
@@ -237,13 +288,13 @@ document.addEventListener('submit', (event) => {
 
         Repertoire.addPiece(newPieceData);
         renderDynamicContent();
-        alert(`Peça "${title}" adicionada com sucesso à matriz!`);
+        alert(`Peça "${title}" adicionada com sucesso!`);
     }
 });
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Fase 5 carregada: Histórico e contador de avaliações integrados.');
+    console.log('Fase 6 carregada: Matriz de múltiplos microblocos integrada.');
     renderDynamicContent();
     setupTimerEngine();
 });
