@@ -1,5 +1,5 @@
 /**
- * neuroEngine.js - Motor Neurocientífico & Gerador Prescritivo (Versão 5)
+ * neuroEngine.js - Motor Neurocientífico & Gerador Prescritivo (Versão 6 Final)
  */
 
 const LEITNER_INTERVALS_DAYS = {
