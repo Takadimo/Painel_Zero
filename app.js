@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 2)
+ * Painel de Estudos de Piano & Acordeon (Versão 3)
  */
 
 let timerInterval = null;
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos V2 inicializado.");
+    console.log("[App] Painel de Estudos V3 inicializado.");
 });
 
 /**
@@ -36,9 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
 function renderApp(state) {
     renderTabs(state.activeTab);
     
-    // Renderiza a Sessão Guiada 1-Clique
+    // Renderiza a Sessão Guiada
     if (window.SessionPlayer) {
         window.SessionPlayer.renderUI(state);
+    }
+
+    // Renderiza a Sessão Sanduíche
+    if (window.SandwichPlayer) {
+        window.SandwichPlayer.renderUI(state);
     }
 
     renderColdAudits(state);
@@ -68,7 +73,6 @@ function renderColdAudits(state) {
     const cardEl = document.getElementById("coldAuditCard");
     if (!container) return;
 
-    // Se uma sessão guiada estiver ativa, esconde o card avulso para não poluir
     if (state.sessionState && state.sessionState.guidedActive) {
         if (cardEl) cardEl.style.display = "none";
         return;
@@ -167,9 +171,15 @@ function renderRepertoireView(state) {
                         <div>
                             <strong>${t.label}</strong> (Comp. ${t.compassos})
                             <span class="box-badge box-${t.box}" style="margin-left: 4px;">Caixa ${t.box}</span>
+                            ${t.isCorrectingHabit ? '<span class="badge danger" style="margin-left:4px;">🛠️ Vício</span>' : ''}
                         </div>
-                        <div style="color: var(--text-muted); font-size: 0.72rem;">
-                            Histórico: ${t.lifetimeHits || 0}/${t.lifetimeAttempts || 0} (${t.slips || 0} slips)
+                        <div style="display:flex; align-items:center; gap: 8px;">
+                            <span style="color: var(--text-muted); font-size: 0.72rem;">
+                                ${t.lifetimeHits || 0}/${t.lifetimeAttempts || 0} (${t.slips || 0} slips)
+                            </span>
+                            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;" data-action="start-sandwich-specific" data-piece="${piece.id}" data-trecho="${t.id}">
+                                🥪 Sanduíche
+                            </button>
                         </div>
                     </div>
                 `).join('')}
@@ -198,7 +208,7 @@ function setupGlobalEventListeners() {
                 }
                 break;
 
-            // Handlers da Sessão Guiada 1-Clique
+            // Handlers da Sessão Guiada
             case "start-guided-session":
                 if (window.SessionPlayer) window.SessionPlayer.startSession();
                 break;
@@ -213,6 +223,37 @@ function setupGlobalEventListeners() {
 
             case "exit-guided-session":
                 if (window.SessionPlayer) window.SessionPlayer.exitSession();
+                break;
+
+            case "open-sandwich-from-block":
+                if (window.SandwichPlayer) window.SandwichPlayer.startSession(pieceId, trechoId);
+                break;
+
+            // Handlers do Modo Sanduíche
+            case "start-sandwich-specific":
+                if (window.SandwichPlayer) window.SandwichPlayer.startSession(pieceId, trechoId);
+                break;
+
+            case "sw-hit":
+                if (window.SandwichPlayer) window.SandwichPlayer.registerHit();
+                break;
+
+            case "sw-miss":
+                if (window.SandwichPlayer) window.SandwichPlayer.registerMiss();
+                break;
+
+            case "toggle-prompt":
+                if (window.SandwichPlayer) window.SandwichPlayer.togglePromptVisibility();
+                break;
+
+            case "skip-tech-interval":
+                if (window.SandwichPlayer) window.SandwichPlayer.skipTechnicalInterval();
+                break;
+
+            case "finish-sandwich-early":
+                if (confirm("Deseja encerrar o treino Sanduíche? O progresso até aqui será consolidado.")) {
+                    if (window.SandwichPlayer) window.SandwichPlayer.finishSession();
+                }
                 break;
 
             // Handlers de Auditoria a Frio
@@ -241,7 +282,7 @@ function setupGlobalEventListeners() {
                 resetFocusTimer();
                 break;
 
-            // Backup & Configurações
+            // Backup
             case "export-savegame":
                 exportSavegameToClipboard();
                 break;
