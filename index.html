@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estudos - Piano & Acordeon (V4)</title>
+    <title>Painel de Estudos - Piano & Acordeon (V5)</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -66,20 +66,20 @@
             display: flex;
             gap: 6px;
             padding: 0 16px 14px;
-            max-width: 720px;
+            max-width: 760px;
             margin: 0 auto;
             overflow-x: auto;
         }
 
         .tab-btn {
             flex: 1;
-            min-width: 72px;
+            min-width: 68px;
             background: var(--card);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            padding: 10px 4px;
+            padding: 10px 3px;
             border-radius: 12px;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
@@ -101,7 +101,7 @@
         /* Container Principal */
         .container {
             padding: 0 16px;
-            max-width: 720px;
+            max-width: 760px;
             margin: 0 auto;
         }
 
@@ -180,7 +180,7 @@
         .box-4 { background: var(--box4); }
         .box-5 { background: var(--box5); }
 
-        /* Banners e Progressos */
+        /* Banner Pedagógico */
         .pedagogical-banner {
             background: rgba(59, 130, 246, 0.12);
             border-left: 4px solid var(--accent);
@@ -192,6 +192,7 @@
             line-height: 1.4;
         }
 
+        /* Barra de Progresso dos Blocos */
         .blocks-progress {
             display: flex;
             gap: 6px;
@@ -306,6 +307,53 @@
             accent-color: var(--accent2);
             width: 16px;
             height: 16px;
+        }
+
+        /* Heatmap Grid */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin: 12px 0;
+        }
+        .heatmap-day {
+            aspect-ratio: 1;
+            background: #0b1220;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .heatmap-day.lvl-1 { background: rgba(59, 130, 246, 0.3); color: #93c5fd; }
+        .heatmap-day.lvl-2 { background: rgba(59, 130, 246, 0.6); color: #fff; }
+        .heatmap-day.lvl-3 { background: var(--accent2); color: #04240f; font-weight: 700; }
+
+        /* Filtros da Central de Tempo */
+        .time-filters {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .filter-btn {
+            flex: 1;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 8px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
         }
 
         /* Cronômetros e Botões */
@@ -462,6 +510,7 @@
         <button class="tab-btn" data-action="switch-tab" data-tab="pecas">Peças</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="tecnica">Técnica</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="leitura">Leitura</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="progresso">Progresso</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="config">Config</button>
     </nav>
 
@@ -525,7 +574,7 @@
             </div>
         </section>
 
-        <!-- ABA: TÉCNICA (CÍRCULO DE QUINTAS) -->
+        <!-- ABA: TÉCNICA -->
         <section id="section-tecnica" class="section">
             <div class="card">
                 <h2>⚙️ Pilar Técnico (3 Níveis) <span class="badge info">Fundamentos</span></h2>
@@ -534,11 +583,42 @@
             </div>
         </section>
 
-        <!-- ABA: LEITURA À PRIMEIRA VISTA (FABER 001-128) -->
+        <!-- ABA: LEITURA -->
         <section id="section-leitura" class="section">
             <div class="card">
                 <h2>📖 Leitura à Primeira Vista (Faber 001 a 128) <span class="badge accent2">60s Análise</span></h2>
                 <div id="readingContainer"></div>
+            </div>
+        </section>
+
+        <!-- ABA: PROGRESSO (GRÁFICOS SVG & MATURIDADE) -->
+        <section id="section-progresso" class="section">
+            <div class="card">
+                <h2>🏔️ Pirâmide de Mielinização (Caixas Leitner) <span class="badge info">Maturidade</span></h2>
+                <p style="margin-bottom: 10px;">Distribuição da massa de repertório pelas 5 caixas de retenção pós-sono.</p>
+                <div id="pyramidContainer"></div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Círculo de Quintas (Radar das 12 Tonalidades) <span class="badge purple">Técnica</span></h2>
+                <p style="margin-bottom: 10px;">Cobertura harmônica de Escalas, Arpejos e Cadências.</p>
+                <div id="circleOfFifthsContainer" style="display: flex; justify-content: center;"></div>
+            </div>
+
+            <div class="card">
+                <h2>📅 Calendário de Consistência (4 Semanas) <span class="badge accent2">Consistência</span></h2>
+                <p style="margin-bottom: 6px;">Histórico visual dos dias de prática.</p>
+                <div id="heatmapContainer"></div>
+            </div>
+
+            <div class="card">
+                <h2>⏱️ Central Hierárquica de Tempo</h2>
+                <div class="time-filters">
+                    <button class="filter-btn active" data-action="filter-time" data-filter="today">Hoje</button>
+                    <button class="filter-btn" data-action="filter-time" data-filter="week">Esta Semana</button>
+                    <button class="filter-btn" data-action="filter-time" data-filter="total">Histórico Total</button>
+                </div>
+                <div id="timeBreakdownContainer"></div>
             </div>
         </section>
 
@@ -559,6 +639,7 @@
     <script src="neuroEngine.js"></script>
     <script src="technical.js"></script>
     <script src="reading.js"></script>
+    <script src="charts.js"></script>
     <script src="sessionPlayer.js"></script>
     <script src="sandwichPlayer.js"></script>
     <script src="app.js"></script>
