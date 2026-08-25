@@ -1,4 +1,23 @@
-/**
+import { StateManager } from './state.js';
+
+// Inicializa o estado ao carregar a aplicação
+document.addEventListener("DOMContentLoaded", () => {
+  const state = StateManager.init();
+  console.log("[App] Estado inicializado:", state);
+
+  // Inscreve a UI para re-renderizar em atualizações
+  StateManager.subscribe((currentState, action) => {
+    console.log(`[App] Mudança de estado detectada: ${action}`);
+    renderApp(currentState);
+  });
+
+  // Primeira renderização da interface
+  renderApp(state);
+});
+
+function renderApp(state) {
+  // Chamada para os renderizadores modulares (Abas, Hoje, Peças, etc.)
+}/**
  * Arquivo principal de controle da UI, Cronômetro, Gestão de Múltiplos Blocos e Histórico
  */
 
