@@ -1,5 +1,5 @@
 /**
- * repertoire.js - Matriz de Repertório & Microblocos (Versão 3)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 4)
  * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
@@ -51,7 +51,7 @@ const DEFAULT_REPERTOIRE = {
           compassos: "1-8",
           baseBlockIds: ["12.1.1-4", "12.1.5-8"],
           box: 1,
-          isCorrectingHabit: true, // Vício motor a corrigir (meta de 5 acertos)
+          isCorrectingHabit: true,
           consolidated: false,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 1,
