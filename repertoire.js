@@ -1,6 +1,6 @@
 /**
  * Matriz Dinâmica de Repertório e Trechos Ativos
- * Aqui você gerencia o que está sendo estudado sem precisar mexer no código visual.
+ * Gerencia as peças, compositores e microblocos de estudo.
  */
 
 const INITIAL_REPERTOIRE = [
