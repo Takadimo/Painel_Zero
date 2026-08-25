@@ -87,25 +87,30 @@
     <!-- Conteúdo das Abas -->
     <main>
         <section id="tab-hoje" class="tab-content active">
-            <h2>Sessão de Hoje</h2>
-            <p>O motor prescritivo e os trechos diários aparecerão aqui nas próximas fases.</p>
-            <button class="btn-action" data-action="test-action">Testar Estado</button>
+            <h2>Sessão de Hoje (Matriz Dinâmica)</h2>
+            <p>Trechos ativos carregados automaticamente da configuração:</p>
+            <div id="trechos-hoje-container">
+                <!-- Conteúdo injetado via JavaScript -->
+            </div>
         </section>
 
         <section id="tab-pecas" class="tab-content">
             <h2>Gerenciamento de Repertório</h2>
-            <p>Listagem de peças e matriz dinâmica.</p>
+            <div id="lista-pecas-container">
+                <!-- Conteúdo injetado via JavaScript -->
+            </div>
         </section>
 
         <section id="tab-config" class="tab-content">
             <h2>Configurações e Dados</h2>
-            <p>Estado atual salvo no navegador:</p>
+            <p>Estado atual salvo no navegador (incluindo histórico de avaliações):</p>
             <pre id="state-debug" style="background:#0f172a; padding:10px; border-radius:6px; overflow-x:auto;"></pre>
         </section>
     </main>
 
-    <!-- Carregamento dos Módulos JavaScript -->
+    <!-- Carregamento dos Módulos JavaScript (Ordem correta de dependência) -->
     <script src="state.js"></script>
+    <script src="repertoire.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
