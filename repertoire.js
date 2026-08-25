@@ -1,5 +1,5 @@
 /**
- * repertoire.js - Matriz de Repertório & Microblocos (Versão 5)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 6 Final)
  * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
@@ -166,9 +166,6 @@ class RepertoireManagerClass {
     });
   }
 
-  /**
-   * Retorna a contagem de trechos por Caixa Leitner (0 a 5) para a Pirâmide de Mielinização
-   */
   getLeitnerDistribution() {
     const counts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     this.getActivePieces().forEach(piece => {
