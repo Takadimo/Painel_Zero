@@ -1,11 +1,6 @@
 /**
  * technical.js - Gerenciador do Pilar Técnico & Desafios de Velocidade
- * Painel de Estudos de Piano & Acordeon (Versão 4)
- * 
- * Taxonomia Hierárquica em 3 Níveis:
- * - Nível 1: Bloco Técnico Geral (minutos consolidados para metas)
- * - Nível 2: Categorias Fundamentais (1.1 Escalas, 1.2 Arpejos, 1.3 Cadências)
- * - Nível 3: Submodalidades (Movimento Paralelo, Contrário, Russo, Inversões)
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 let techTimerInterval = null;
@@ -67,10 +62,6 @@ class TechnicalManagerClass {
     el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
-  /**
-   * Autoavaliação de fluidez e ajuste adaptativo de BPM
-   * @param {'fluent'|'limit'|'fast'} evaluation 
-   */
   evaluatePractice(evaluation) {
     this.stopTimer();
     if (!currentTechItem) return;
@@ -93,7 +84,6 @@ class TechnicalManagerClass {
     const category = currentTechItem.category;
     const itemId = currentTechItem.id;
 
-    // Atualiza o exercício técnico no StateManager
     window.StateManager.setState(prev => {
       const catList = [...(prev.technical[category] || [])];
       const idx = catList.findIndex(i => i.id === itemId);
@@ -125,7 +115,6 @@ class TechnicalManagerClass {
 
     const tech = state.technical || {};
 
-    // Se estiver praticando um exercício ativo
     if (currentTechItem) {
       container.innerHTML = `
         <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
@@ -162,10 +151,8 @@ class TechnicalManagerClass {
       return;
     }
 
-    // Visualização dos 3 Níveis
     container.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 14px;">
-        <!-- 1. ESCALAS -->
         <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
           <h3 style="color: #fff; margin-bottom: 8px;">1.1 Escalas (Padrão Russo & Mov. Contrário)</h3>
           ${(tech.scales || []).map(item => `
@@ -181,7 +168,6 @@ class TechnicalManagerClass {
           `).join('')}
         </div>
 
-        <!-- 2. ARPEJOS -->
         <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
           <h3 style="color: #fff; margin-bottom: 8px;">1.2 Arpejos (Posição Fundamental & Inversões)</h3>
           ${(tech.arpeggios || []).map(item => `
@@ -197,7 +183,6 @@ class TechnicalManagerClass {
           `).join('')}
         </div>
 
-        <!-- 3. CADÊNCIAS -->
         <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
           <h3 style="color: #fff; margin-bottom: 8px;">1.3 Cadências nos 12 Tons</h3>
           ${(tech.cadences || []).map(item => `
