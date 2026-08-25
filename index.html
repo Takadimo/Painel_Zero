@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estudos - Piano & Acordeon (V3)</title>
+    <title>Painel de Estudos - Piano & Acordeon (V4)</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -66,24 +66,25 @@
             display: flex;
             gap: 6px;
             padding: 0 16px 14px;
-            max-width: 650px;
+            max-width: 720px;
             margin: 0 auto;
             overflow-x: auto;
         }
 
         .tab-btn {
             flex: 1;
-            min-width: 75px;
+            min-width: 72px;
             background: var(--card);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            padding: 10px 6px;
+            padding: 10px 4px;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .tab-btn:hover {
@@ -97,10 +98,10 @@
             border-color: var(--accent);
         }
 
-        /* Container Principal e Seções */
+        /* Container Principal */
         .container {
             padding: 0 16px;
-            max-width: 650px;
+            max-width: 720px;
             margin: 0 auto;
         }
 
@@ -118,7 +119,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Cards e Componentes */
+        /* Cards */
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -179,7 +180,7 @@
         .box-4 { background: var(--box4); }
         .box-5 { background: var(--box5); }
 
-        /* Banner Pedagógico */
+        /* Banners e Progressos */
         .pedagogical-banner {
             background: rgba(59, 130, 246, 0.12);
             border-left: 4px solid var(--accent);
@@ -191,7 +192,6 @@
             line-height: 1.4;
         }
 
-        /* Barra de Progresso dos Blocos */
         .blocks-progress {
             display: flex;
             gap: 6px;
@@ -220,7 +220,6 @@
             color: var(--accent2);
         }
 
-        /* Player Box */
         .player-box {
             background: var(--card-inner);
             border: 1px solid var(--border);
@@ -229,7 +228,6 @@
             margin-top: 12px;
         }
 
-        /* Barra de Respiração / Micro-Replay 10s */
         .replay-bar-wrap {
             height: 6px;
             background: #0f172a;
@@ -244,15 +242,14 @@
             transition: width 0.1s linear;
         }
 
-        /* Partitura / Prompt Area */
         .sheet-container {
             background: #0b1220;
             border: 1px dashed var(--border);
             border-radius: 10px;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
             margin: 10px 0;
-            min-height: 80px;
+            min-height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -264,7 +261,54 @@
             color: #c7d2fe;
         }
 
-        /* Cronômetro e Controles */
+        /* Split View da Aba Leitura */
+        .split-view-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 600px) {
+            .split-view-container {
+                grid-template-columns: 60% 40%;
+            }
+        }
+        .reading-sheet-viewer {
+            background: #0b1220;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            max-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .reading-controls-panel {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        /* Checklist 60s */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.8rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .checklist-item input[type="checkbox"] {
+            accent-color: var(--accent2);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Cronômetros e Botões */
         .timer-box {
             display: flex;
             align-items: center;
@@ -306,7 +350,6 @@
         .btn-guided-main { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #04240f; font-weight: 800; padding: 14px; font-size: 0.95rem; border-radius: 12px; width: 100%; }
         .btn-sandwich-main { background: linear-gradient(90deg, #8b5cf6, #ec4899); color: #ffffff; font-weight: 800; padding: 12px; font-size: 0.9rem; border-radius: 10px; width: 100%; }
 
-        /* Botões de Auditoria & Prática */
         .btn-audit {
             flex: 1;
             padding: 10px 6px;
@@ -322,7 +365,6 @@
         .btn-audit-slip { background: var(--warn); color: #3a2600; }
         .btn-audit-miss { background: var(--danger); color: #ffffff; }
 
-        /* Item de Auditoria a Frio */
         .audit-item {
             background: var(--card-inner);
             border: 1px solid var(--border);
@@ -346,7 +388,6 @@
             color: var(--text-muted);
         }
 
-        /* Grid de Estatísticas */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -374,7 +415,6 @@
             margin-top: 2px;
         }
 
-        /* Lista de Peças e Trechos */
         .piece-item {
             background: var(--card-inner);
             border: 1px solid var(--border);
@@ -420,29 +460,24 @@
         <button class="tab-btn active" data-action="switch-tab" data-tab="hoje">Hoje</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="sanduiche">Sanduíche</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="pecas">Peças</button>
-        <button class="tab-btn" data-action="switch-tab" data-tab="config">Configurações</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="tecnica">Técnica</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="leitura">Leitura</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="config">Config</button>
     </nav>
 
     <main class="container">
         <!-- ABA: HOJE -->
         <section id="section-hoje" class="section active">
-            <!-- Card Principal: Sessão Guiada 1-Clique -->
             <div class="card" id="guidedSessionCard">
                 <h2>🎯 Sessão Guiada do Dia <span class="badge info">Plug & Play</span></h2>
-                <div id="guidedSessionContent">
-                    <!-- Renderizado pelo sessionPlayer.js -->
-                </div>
+                <div id="guidedSessionContent"></div>
             </div>
 
-            <!-- Card: Auditoria a Frio Avulsa -->
             <div class="card" id="coldAuditCard">
                 <h2>❄️ Auditorias a Frio Pendentes <span id="auditBadgeCount" class="badge warn">0 pendentes</span></h2>
-                <div id="auditListContainer">
-                    <!-- Renderizado pelo app.js -->
-                </div>
+                <div id="auditListContainer"></div>
             </div>
 
-            <!-- Card de Cronômetro Livre -->
             <div class="card">
                 <h2>⏱️ Cronômetro Livre <span class="badge info">Sessão</span></h2>
                 <div class="timer-box">
@@ -455,7 +490,6 @@
                 </div>
             </div>
 
-            <!-- Card de Resumo Diário -->
             <div class="card">
                 <h2>📊 Resumo de Hoje</h2>
                 <div class="stat-grid">
@@ -475,13 +509,11 @@
             </div>
         </section>
 
-        <!-- ABA: SANDUÍCHE (PRÁTICA EM BLOCO INTERCALADA) -->
+        <!-- ABA: SANDUÍCHE -->
         <section id="section-sanduiche" class="section">
-            <div class="card" id="sandwichSessionCard">
+            <div class="card">
                 <h2>🥪 Sessão Sanduíche <span class="badge purple">3 Rounds + 2 Intervalos</span></h2>
-                <div id="sandwichContainer">
-                    <!-- Renderizado dinamicamente pelo sandwichPlayer.js -->
-                </div>
+                <div id="sandwichContainer"></div>
             </div>
         </section>
 
@@ -489,9 +521,24 @@
         <section id="section-pecas" class="section">
             <div class="card">
                 <h2>🎵 Repertório & Caixas Leitner</h2>
-                <div id="repertoireList">
-                    <!-- Renderizado pelo app.js -->
-                </div>
+                <div id="repertoireList"></div>
+            </div>
+        </section>
+
+        <!-- ABA: TÉCNICA (CÍRCULO DE QUINTAS) -->
+        <section id="section-tecnica" class="section">
+            <div class="card">
+                <h2>⚙️ Pilar Técnico (3 Níveis) <span class="badge info">Fundamentos</span></h2>
+                <p style="margin-bottom: 12px;">Prática estruturada de Escalas, Arpejos e Cadências nos 12 tons.</p>
+                <div id="technicalContainer"></div>
+            </div>
+        </section>
+
+        <!-- ABA: LEITURA À PRIMEIRA VISTA (FABER 001-128) -->
+        <section id="section-leitura" class="section">
+            <div class="card">
+                <h2>📖 Leitura à Primeira Vista (Faber 001 a 128) <span class="badge accent2">60s Análise</span></h2>
+                <div id="readingContainer"></div>
             </div>
         </section>
 
@@ -510,6 +557,8 @@
     <script src="state.js"></script>
     <script src="repertoire.js"></script>
     <script src="neuroEngine.js"></script>
+    <script src="technical.js"></script>
+    <script src="reading.js"></script>
     <script src="sessionPlayer.js"></script>
     <script src="sandwichPlayer.js"></script>
     <script src="app.js"></script>
