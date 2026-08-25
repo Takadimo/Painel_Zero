@@ -1,6 +1,6 @@
 /**
  * sandwichPlayer.js - Controlador do Modo de Prática em Bloco Sanduíche
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 let swTimerInterval = null;
