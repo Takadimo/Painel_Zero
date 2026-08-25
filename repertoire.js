@@ -1,5 +1,5 @@
 /**
- * repertoire.js - Matriz de Repertório & Microblocos (Versão 1)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 2)
  * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
@@ -47,6 +47,7 @@ const DEFAULT_REPERTOIRE = {
           label: "12.2.1-8",
           passo: 2,
           compassos: "1-8",
+          baseBlockIds: ["12.1.1-4", "12.1.5-8"],
           box: 1,
           consolidated: false,
           nextReviewDate: new Date().toISOString().split("T")[0],
@@ -93,6 +94,20 @@ const DEFAULT_REPERTOIRE = {
           consecutiveColdPasses: 0,
           lifetimeHits: 4,
           lifetimeAttempts: 5
+        },
+        {
+          id: "13.2.1-8",
+          label: "13.2.1-8",
+          passo: 2,
+          compassos: "1-8",
+          baseBlockIds: ["13.1.1-4", "13.1.5-8"],
+          box: 0,
+          consolidated: false,
+          nextReviewDate: null,
+          slips: 0,
+          consecutiveColdPasses: 0,
+          lifetimeHits: 0,
+          lifetimeAttempts: 0
         }
       ]
     }
@@ -126,8 +141,22 @@ class RepertoireManagerClass {
   }
 
   /**
-   * Atualiza um trecho específico de uma peça
+   * Verifica se os microblocos base de um trecho de Passo 2 estão consolidados (Caixa >= 2)
    */
+  isPasso2Unlocked(pieceId, passo2TrechoId) {
+    const piece = this.getActivePieces().find(p => p.id === pieceId);
+    if (!piece) return false;
+
+    const targetTrecho = (piece.trechos || []).find(t => t.id === passo2TrechoId);
+    if (!targetTrecho || !targetTrecho.baseBlockIds) return true;
+
+    // Todos os microblocos base devem estar em Caixa >= 2
+    return targetTrecho.baseBlockIds.every(baseId => {
+      const baseTrecho = piece.trechos.find(t => t.id === baseId);
+      return baseTrecho && baseTrecho.box >= 2;
+    });
+  }
+
   updateTrecho(pieceId, trechoId, trechoUpdates) {
     window.StateManager.setState(prev => {
       const active = (prev.repertoire && prev.repertoire.active) ? [...prev.repertoire.active] : [];
