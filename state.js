@@ -1,12 +1,13 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 4)
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 const DEFAULT_STATE = {
-  version: "v4.0.0",
+  version: "v5.0.0",
   lastSaved: null,
   activeTab: "hoje",
+  timeFilter: "today", // 'today', 'week', 'total'
   xp: 0,
   globalStats: {
     totalSessions: 0,
@@ -35,16 +36,17 @@ const DEFAULT_STATE = {
   },
   technical: {
     scales: [
-      { id: "s1", title: "Escala Fá# Maior", desc: "Padrão Russo / 4 oitavas", bpm: 60, targetBpm: 90, totalMinutes: 0 },
-      { id: "s2", title: "Escala Dó Maior", desc: "Movimento Contrário / 2 oitavas", bpm: 70, targetBpm: 100, totalMinutes: 0 },
-      { id: "s3", title: "Escala Lá menor", desc: "Movimento Paralelo / 4 oitavas", bpm: 60, targetBpm: 80, totalMinutes: 0 }
+      { id: "s1", title: "Escala Fá# Maior", desc: "Padrão Russo / 4 oitavas", bpm: 60, targetBpm: 90, totalMinutes: 0, tone: "F#" },
+      { id: "s2", title: "Escala Dó Maior", desc: "Movimento Contrário / 2 oitavas", bpm: 70, targetBpm: 100, totalMinutes: 0, tone: "C" },
+      { id: "s3", title: "Escala Lá menor", desc: "Movimento Paralelo / 4 oitavas", bpm: 60, targetBpm: 80, totalMinutes: 0, tone: "Am" },
+      { id: "s4", title: "Escala Sol Maior", desc: "Movimento Paralelo / 4 oitavas", bpm: 60, targetBpm: 90, totalMinutes: 0, tone: "G" }
     ],
     arpeggios: [
-      { id: "a1", title: "Arpejo Fá menor", desc: "Posição Fundamental e 1ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0 },
-      { id: "a2", title: "Arpejo Dó menor", desc: "2ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0 }
+      { id: "a1", title: "Arpejo Fá menor", desc: "Posição Fundamental e 1ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0, tone: "Fm" },
+      { id: "a2", title: "Arpejo Dó menor", desc: "2ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0, tone: "Cm" }
     ],
     cadences: [
-      { id: "c1", title: "Cadência nos 12 Tons", desc: "Progressão Im - IVm - V7 - Im", bpm: 60, targetBpm: 72, totalMinutes: 0 }
+      { id: "c1", title: "Cadência nos 12 Tons", desc: "Progressão Im - IVm - V7 - Im", bpm: 60, targetBpm: 72, totalMinutes: 0, tone: "12T" }
     ],
     currentBpmHistory: {}
   },
@@ -53,7 +55,10 @@ const DEFAULT_STATE = {
     completedExercises: [],
     history: []
   },
-  history: [],
+  history: [
+    { date: new Date().toLocaleDateString("pt-BR"), type: "Auditoria a Frio", pieceId: "p12", trechoId: "12.1.1-4", durationMinutes: 5, accuracyPct: 100 },
+    { date: new Date().toLocaleDateString("pt-BR"), type: "Sessão Sanduíche", pieceId: "p13", trechoId: "13.1.1-4", durationMinutes: 15, accuracyPct: 80 }
+  ],
   sessionState: {
     inProgress: false,
     guidedActive: false,
