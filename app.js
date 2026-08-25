@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 let timerInterval = null;
@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos V5 inicializado.");
+    populateOfflineSelects(state);
+    console.log("[App] Painel de Estudos V6 Final inicializado com sucesso.");
 });
 
 /**
@@ -36,29 +37,36 @@ document.addEventListener("DOMContentLoaded", () => {
 function renderApp(state) {
     renderTabs(state.activeTab);
     
-    // Renderiza a Sessão Guiada
+    // 1. Sessão Guiada
     if (window.SessionPlayer) {
         window.SessionPlayer.renderUI(state);
     }
 
-    // Renderiza a Sessão Sanduíche
+    // 2. Sessão Sanduíche
     if (window.SandwichPlayer) {
         window.SandwichPlayer.renderUI(state);
     }
 
-    // Renderiza a Aba Técnica
+    // 3. Aba Técnica
     if (window.TechnicalManager) {
         window.TechnicalManager.renderUI(state);
     }
 
-    // Renderiza a Aba Leitura
+    // 4. Aba Leitura
     if (window.ReadingManager) {
         window.ReadingManager.renderUI(state);
     }
 
-    // Renderiza a Aba Progresso (Gráficos SVG & Telemetria)
+    // 5. Aba Progresso (Gráficos SVG & Telemetria)
     if (window.ChartsManager) {
         window.ChartsManager.renderAll(state);
+    }
+
+    // 6. Aba Log & Nuvem (Histórico & URL)
+    if (window.CloudSync) {
+        window.CloudSync.renderHistoryTable(state);
+        const urlInput = document.getElementById("cloudUrlInput");
+        if (urlInput && state.cloudSyncUrl) urlInput.value = state.cloudSyncUrl;
     }
 
     renderColdAudits(state);
@@ -77,6 +85,38 @@ function renderTabs(activeTab) {
     document.querySelectorAll(".section").forEach(sec => {
         sec.classList.toggle("active", sec.id === `section-${activeTab}`);
     });
+}
+
+/**
+ * Popula os selects do formulário de prática offline
+ */
+function populateOfflineSelects(state) {
+    const pilarSelect = document.getElementById("offlinePilarSelect");
+    const itemSelect = document.getElementById("offlineItemSelect");
+    if (!pilarSelect || !itemSelect) return;
+
+    const pilar = pilarSelect.value;
+    itemSelect.innerHTML = "";
+
+    if (pilar === "repertoire") {
+        const pieces = (state.repertoire && state.repertoire.active) ? state.repertoire.active : [];
+        itemSelect.innerHTML = pieces.map(p => `<option value="${p.id}">${p.title}</option>`).join('');
+    } else if (pilar === "technical") {
+        itemSelect.innerHTML = `
+            <option value="scales">Escalas (Padrão Russo / Contrário)</option>
+            <option value="arpeggios">Arpejos (Fundamental / Inversões)</option>
+            <option value="cadences">Cadências nos 12 Tons</option>
+        `;
+    } else if (pilar === "reading") {
+        itemSelect.innerHTML = `
+            <option value="001">Faber 001 - Firefly</option>
+            <option value="002">Faber 002 - Russian Folk Song</option>
+            <option value="003">Faber 003 - The Bell Tower</option>
+            <option value="004">Faber 004 - Classic Minuet</option>
+        `;
+    } else {
+        itemSelect.innerHTML = `<option value="free">Prática Livre / Improvisação</option>`;
+    }
 }
 
 /**
@@ -227,7 +267,36 @@ function setupGlobalEventListeners() {
                 }
                 break;
 
-            // Filtros de Tempo (Aba Progresso)
+            // Nuvem (Google Apps Script)
+            case "save-cloud-url":
+                const urlVal = document.getElementById("cloudUrlInput")?.value;
+                if (window.CloudSync && urlVal) {
+                    window.CloudSync.saveCloudUrl(urlVal.trim());
+                }
+                break;
+
+            case "cloud-push":
+                if (window.CloudSync) window.CloudSync.pushToCloud();
+                break;
+
+            case "cloud-pull":
+                if (window.CloudSync) window.CloudSync.pullFromCloud();
+                break;
+
+            // Registro Manual Offline
+            case "save-offline-practice":
+                const pilar = document.getElementById("offlinePilarSelect")?.value;
+                const item = document.getElementById("offlineItemSelect")?.value;
+                const minutes = document.getElementById("offlineMinutesInput")?.value;
+                const bpm = document.getElementById("offlineBpmInput")?.value;
+                const notes = document.getElementById("offlineNotesInput")?.value;
+
+                if (window.CloudSync) {
+                    window.CloudSync.saveManualOfflinePractice(pilar, item, minutes, bpm, notes);
+                }
+                break;
+
+            // Filtros de Tempo (Progresso)
             case "filter-time":
                 if (filterVal) {
                     document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -322,7 +391,7 @@ function setupGlobalEventListeners() {
                 resetFocusTimer();
                 break;
 
-            // Backup
+            // Backup JSON
             case "export-savegame":
                 exportSavegameToClipboard();
                 break;
@@ -341,6 +410,8 @@ function setupGlobalEventListeners() {
             if (window.ReadingManager) {
                 window.ReadingManager.selectExercise(exId);
             }
+        } else if (e.target.id === "offlinePilarSelect") {
+            populateOfflineSelects(window.StateManager.getState());
         }
     });
 }
