@@ -1,6 +1,6 @@
 /**
  * sessionPlayer.js - Controlador do Player da Sessão Guiada (1-Clique)
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 let blockTimerInterval = null;
@@ -95,6 +95,17 @@ class SessionPlayerClass {
         ...prev.globalStats,
         totalSessions: (prev.globalStats.totalSessions || 0) + 1
       },
+      history: [
+        {
+          date: new Date().toLocaleDateString("pt-BR"),
+          type: "Sessão Guiada 1-Clique",
+          pieceId: "Pipeline 5 Blocos",
+          trechoId: "Treino Completo",
+          durationMinutes: 40,
+          accuracyPct: 100
+        },
+        ...(prev.history || [])
+      ],
       sessionState: {
         inProgress: false,
         guidedActive: false,
