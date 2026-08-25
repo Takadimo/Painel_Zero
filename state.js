@@ -1,13 +1,14 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 const DEFAULT_STATE = {
-  version: "v5.0.0",
+  version: "v6.0.0",
   lastSaved: null,
   activeTab: "hoje",
-  timeFilter: "today", // 'today', 'week', 'total'
+  timeFilter: "today",
+  cloudSyncUrl: "",
   xp: 0,
   globalStats: {
     totalSessions: 0,
@@ -223,7 +224,7 @@ class StateManagerClass {
 
   importSavegame(jsonString) {
     try {
-      const parsed = JSON.parse(jsonString);
+      const parsed = typeof jsonString === "string" ? JSON.parse(jsonString) : jsonString;
       if (!parsed || typeof parsed !== "object") {
         throw new Error("JSON inválido");
       }
