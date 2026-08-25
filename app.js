@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 3)
+ * Painel de Estudos de Piano & Acordeon (Versão 4)
  */
 
 let timerInterval = null;
@@ -27,11 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos V3 inicializado.");
+    console.log("[App] Painel de Estudos V4 inicializado.");
 });
 
 /**
- * Função principal de renderização que orquestra as views
+ * Função principal de renderização que orquestra todas as views
  */
 function renderApp(state) {
     renderTabs(state.activeTab);
@@ -44,6 +44,16 @@ function renderApp(state) {
     // Renderiza a Sessão Sanduíche
     if (window.SandwichPlayer) {
         window.SandwichPlayer.renderUI(state);
+    }
+
+    // Renderiza a Aba Técnica
+    if (window.TechnicalManager) {
+        window.TechnicalManager.renderUI(state);
+    }
+
+    // Renderiza a Aba Leitura
+    if (window.ReadingManager) {
+        window.ReadingManager.renderUI(state);
     }
 
     renderColdAudits(state);
@@ -189,9 +199,10 @@ function renderRepertoireView(state) {
 }
 
 /**
- * Configuração da Delegação Global de Eventos (sem onclick inline)
+ * Delegação Global de Eventos
  */
 function setupGlobalEventListeners() {
+    // Eventos de Clique
     document.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-action]");
         if (!btn) return;
@@ -199,6 +210,9 @@ function setupGlobalEventListeners() {
         const action = btn.dataset.action;
         const pieceId = btn.dataset.piece;
         const trechoId = btn.dataset.trecho;
+        const category = btn.dataset.category;
+        const itemId = btn.dataset.id;
+        const checkItem = btn.dataset.item;
 
         switch (action) {
             case "switch-tab":
@@ -208,63 +222,77 @@ function setupGlobalEventListeners() {
                 }
                 break;
 
-            // Handlers da Sessão Guiada
+            // Sessão Guiada
             case "start-guided-session":
                 if (window.SessionPlayer) window.SessionPlayer.startSession();
                 break;
-
             case "next-guided-block":
                 if (window.SessionPlayer) window.SessionPlayer.nextBlock();
                 break;
-
             case "prev-guided-block":
                 if (window.SessionPlayer) window.SessionPlayer.prevBlock();
                 break;
-
             case "exit-guided-session":
                 if (window.SessionPlayer) window.SessionPlayer.exitSession();
                 break;
-
             case "open-sandwich-from-block":
                 if (window.SandwichPlayer) window.SandwichPlayer.startSession(pieceId, trechoId);
                 break;
 
-            // Handlers do Modo Sanduíche
+            // Modo Sanduíche
             case "start-sandwich-specific":
                 if (window.SandwichPlayer) window.SandwichPlayer.startSession(pieceId, trechoId);
                 break;
-
             case "sw-hit":
                 if (window.SandwichPlayer) window.SandwichPlayer.registerHit();
                 break;
-
             case "sw-miss":
                 if (window.SandwichPlayer) window.SandwichPlayer.registerMiss();
                 break;
-
             case "toggle-prompt":
                 if (window.SandwichPlayer) window.SandwichPlayer.togglePromptVisibility();
                 break;
-
             case "skip-tech-interval":
                 if (window.SandwichPlayer) window.SandwichPlayer.skipTechnicalInterval();
                 break;
-
             case "finish-sandwich-early":
                 if (confirm("Deseja encerrar o treino Sanduíche? O progresso até aqui será consolidado.")) {
                     if (window.SandwichPlayer) window.SandwichPlayer.finishSession();
                 }
                 break;
 
-            // Handlers de Auditoria a Frio
+            // Módulo Técnico
+            case "start-tech-exercise":
+                if (window.TechnicalManager) window.TechnicalManager.startExercisePractice(category, itemId);
+                break;
+            case "eval-tech-fluent":
+                if (window.TechnicalManager) window.TechnicalManager.evaluatePractice("fluent");
+                break;
+            case "eval-tech-limit":
+                if (window.TechnicalManager) window.TechnicalManager.evaluatePractice("limit");
+                break;
+            case "eval-tech-fast":
+                if (window.TechnicalManager) window.TechnicalManager.evaluatePractice("fast");
+                break;
+
+            // Módulo de Leitura
+            case "toggle-check":
+                if (window.ReadingManager && checkItem) window.ReadingManager.toggleChecklist(checkItem);
+                break;
+            case "start-checklist-timer":
+                if (window.ReadingManager) window.ReadingManager.startChecklistTimer();
+                break;
+            case "complete-reading":
+                if (window.ReadingManager) window.ReadingManager.completeReading();
+                break;
+
+            // Auditoria a Frio
             case "audit-hit":
                 if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "hit");
                 break;
-
             case "audit-slip":
                 if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "slip");
                 break;
-
             case "audit-miss":
                 if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "miss");
                 break;
@@ -273,11 +301,9 @@ function setupGlobalEventListeners() {
             case "start-timer":
                 startFocusTimer();
                 break;
-
             case "stop-timer":
                 stopFocusTimer();
                 break;
-
             case "reset-timer":
                 resetFocusTimer();
                 break;
@@ -286,13 +312,22 @@ function setupGlobalEventListeners() {
             case "export-savegame":
                 exportSavegameToClipboard();
                 break;
-
             case "reset-defaults":
                 if (confirm("Deseja realmente resetar todos os dados para o padrão inicial?")) {
                     window.StateManager.resetToDefaults();
                     alert("Dados resetados para o padrão de fábrica.");
                 }
                 break;
+        }
+    });
+
+    // Eventos de Change (Select de Leitura)
+    document.addEventListener("change", (e) => {
+        if (e.target.id === "faberSelect") {
+            const exId = e.target.value;
+            if (window.ReadingManager) {
+                window.ReadingManager.selectExercise(exId);
+            }
         }
     });
 }
