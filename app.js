@@ -1,5 +1,5 @@
 /**
- * Arquivo principal de controle da UI, Renderização, Cronômetro e Delegação Global de Eventos
+ * Arquivo principal de controle da UI, Cronômetro, Cadastro de Peças e Delegação de Eventos
  */
 
 let practiceTimerInterval = null;
@@ -28,12 +28,12 @@ function switchTab(targetTabId) {
     }
 }
 
-// Renderiza dinamicamente as peças, o cronômetro e os trechos na interface
+// Renderiza dinamicamente as peças, o formulário e os trechos na interface
 function renderDynamicContent() {
     const repertoire = Repertoire.getRepertoire();
     const currentState = State.getState();
     
-    // Injeta o bloco do Cronômetro na Aba Hoje se ainda não existir
+    // Injeta o bloco do Cronômetro e Trechos na Aba Hoje
     const hojeContainer = document.getElementById('trechos-hoje-container');
     if (hojeContainer) {
         let timerHtml = `
@@ -43,51 +43,79 @@ function renderDynamicContent() {
                     ${formatTime(currentState.sessionTime || 0)}
                 </div>
                 <div>
-                    <button class="btn-action" data-action="toggle-timer" style="background-color: ${currentState.isPracticing ? '#ef4444' : '#22c55e'}; padding: 10px 20px; font-size: 1em;">
+                    <button class="btn-action" data-action="toggle-timer" style="background-color: ${currentState.isPracticing ? '#ef4444' : '#22c55e'}; padding: 10px 20px; font-size: 1em; border: none; border-radius: 6px; color: white; cursor: pointer;">
                         ${currentState.isPracticing ? 'Pausar Sessão' : 'Iniciar Sessão'}
                     </button>
-                    <button class="btn-action" data-action="reset-timer" style="background-color: #64748b; margin-left: 10px; padding: 10px 20px; font-size: 1em;">Zerar</button>
+                    <button class="btn-action" data-action="reset-timer" style="background-color: #64748b; margin-left: 10px; padding: 10px 20px; font-size: 1em; border: none; border-radius: 6px; color: white; cursor: pointer;">Zerar</button>
                 </div>
             </div>
             <h3 style="color: #f8fafc; margin-top: 20px;">Trechos Ativos para Estudo</h3>
         `;
 
         if (repertoire.length === 0) {
-            hojeContainer.innerHTML = timerHtml + '<p>Nenhum repertório cadastrado na matriz.</p>';
+            hojeContainer.innerHTML = timerHtml + '<p style="color: #94a3b8;">Nenhum repertório cadastrado na matriz.</p>';
         } else {
             let html = timerHtml;
             repertoire.forEach(piece => {
-                piece.blocks.forEach(block => {
-                    html += `
-                        <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                            <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title} <span style="font-size: 0.8em; color: #94a3b8;">(${piece.composer})</span></h4>
-                            <p style="margin: 5px 0; color: #cbd5e1;">Compassos: <strong>${block.compass}</strong> | Tipo: <em>${block.type}</em></p>
-                            <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="acerto" style="background-color: #0284c7; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Acertei / Avançar</button>
-                            <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="erro" style="background-color: #ef4444; margin-left: 10px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Precisa Atenção</button>
-                        </div>
-                    `;
-                });
+                if (piece.blocks && Array.isArray(piece.blocks)) {
+                    piece.blocks.forEach(block => {
+                        html += `
+                            <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title} <span style="font-size: 0.8em; color: #94a3b8;">(${piece.composer})</span></h4>
+                                <p style="margin: 5px 0; color: #cbd5e1;">Compassos: <strong>${block.compass}</strong> | Tipo: <em>${block.type}</em></p>
+                                <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="acerto" style="background-color: #0284c7; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Acertei / Avançar</button>
+                                <button class="btn-action" data-action="evaluate-block" data-piece-id="${piece.id}" data-block-id="${block.id}" data-result="erro" style="background-color: #ef4444; margin-left: 10px; padding: 6px 12px; border: none; border-radius: 4px; color: white; cursor: pointer;">Precisa Atenção</button>
+                            </div>
+                        `;
+                    });
+                }
             });
             hojeContainer.innerHTML = html;
         }
     }
 
-    // Renderiza na Aba Peças
+    // Renderiza na Aba Peças (Com lista e formulário de cadastro)
     const pecasContainer = document.getElementById('lista-pecas-container');
     if (pecasContainer) {
-        let html = '';
-        repertoire.forEach(piece => {
-            html += `
-                <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <h3 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title}</h3>
-                    <p style="margin: 0 0 10px 0; color: #94a3b8;">Compositor: ${piece.composer}</p>
-                    <ul style="margin: 0; padding-left: 20px; color: #cbd5e1;">
-                        ${piece.blocks.map(b => `<li>Compassos ${b.compass} (${b.type}) - Status: <strong>${b.status}</strong></li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        });
-        pecasContainer.innerHTML = html;
+        let formHtml = `
+            <div style="background: #0f172a; border: 1px solid #334155; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #38bdf8;">➕ Adicionar Nova Peça / Exercício</h3>
+                <form id="form-add-piece" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="display: block; color: #cbd5e1; font-size: 0.9em; margin-bottom: 4px;">Título da Peça:</label>
+                        <input type="text" id="piece-title" required placeholder="Ex: Prelúdio em Dó Maior" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
+                    </div>
+                    <div>
+                        <label style="display: block; color: #cbd5e1; font-size: 0.9em; margin-bottom: 4px;">Compositor:</label>
+                        <input type="text" id="piece-composer" required placeholder="Ex: J. S. Bach" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
+                    </div>
+                    <div>
+                        <label style="display: block; color: #cbd5e1; font-size: 0.9em; margin-bottom: 4px;">Compassos do Microbloco:</label>
+                        <input type="text" id="piece-compass" required placeholder="Ex: 1-8" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;" />
+                    </div>
+                    <button type="submit" class="btn-action" data-action="submit-new-piece" style="background-color: #22c55e; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 5px;">Salvar na Matriz</button>
+                </form>
+            </div>
+            <h3 style="color: #f8fafc; margin-bottom: 15px;">Repertório Cadastrado</h3>
+        `;
+
+        let listHtml = formHtml;
+        if (repertoire.length === 0) {
+            listHtml += '<p style="color: #94a3b8;">Nenhuma peça cadastrada.</p>';
+        } else {
+            repertoire.forEach(piece => {
+                listHtml += `
+                    <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 5px 0; color: #38bdf8;">${piece.title}</h4>
+                        <p style="margin: 0 0 10px 0; color: #94a3b8;">Compositor: ${piece.composer}</p>
+                        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1;">
+                            ${piece.blocks && piece.blocks.map(b => `<li>Compassos ${b.compass} (${b.type}) - Status: <strong>${b.status}</strong></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+        }
+        pecasContainer.innerHTML = listHtml;
     }
 }
 
@@ -171,9 +199,38 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// Intercepta o envio do formulário de nova peça
+document.addEventListener('submit', (event) => {
+    if (event.target && event.target.id === 'form-add-piece') {
+        event.preventDefault();
+        
+        const title = document.getElementById('piece-title').value.trim();
+        const composer = document.getElementById('piece-composer').value.trim();
+        const compass = document.getElementById('piece-compass').value.trim();
+        
+        if (!title || !composer || !compass) return;
+
+        const newPieceId = title.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+        const newBlockId = 'b_' + Date.now();
+
+        const newPieceData = {
+            id: newPieceId,
+            title: title,
+            composer: composer,
+            blocks: [
+                { id: newBlockId, compass: compass, type: "Microbloco", status: "Novo" }
+            ]
+        };
+
+        Repertoire.addPiece(newPieceData);
+        renderDynamicContent();
+        alert(`Peça "${title}" adicionada com sucesso à matriz!`);
+    }
+});
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Fase 3 carregada: Cronômetro e motor de sessão integrados.');
+    console.log('Fase 4 carregada: Formulário de cadastro de peças integrado.');
     renderDynamicContent();
     setupTimerEngine();
 });
