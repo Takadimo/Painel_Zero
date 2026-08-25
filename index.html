@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estudos - Piano & Acordeon (V1)</title>
+    <title>Painel de Estudos - Piano & Acordeon (V2)</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -159,6 +159,7 @@
         .badge.warn { background: var(--warn); color: #3a2600; }
         .badge.info { background: var(--accent); color: #ffffff; }
         .badge.danger { background: var(--danger); color: #ffffff; }
+        .badge.locked { background: #475569; color: #cbd5e1; }
 
         /* Badges das Caixas Leitner */
         .box-badge {
@@ -174,6 +175,56 @@
         .box-3 { background: var(--box3); }
         .box-4 { background: var(--box4); }
         .box-5 { background: var(--box5); }
+
+        /* Banner Pedagógico da Sessão Guiada */
+        .pedagogical-banner {
+            background: rgba(59, 130, 246, 0.12);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 10px 0;
+            font-size: 0.82rem;
+            color: #93c5fd;
+            line-height: 1.4;
+        }
+
+        /* Barra de Progresso dos Blocos */
+        .blocks-progress {
+            display: flex;
+            gap: 6px;
+            margin: 12px 0 8px;
+        }
+        .block-step {
+            flex: 1;
+            padding: 8px 4px;
+            text-align: center;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .block-step.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+        .block-step.done {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        /* Player Box */
+        .player-box {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 12px;
+        }
 
         /* Cronômetro e Controles */
         .timer-box {
@@ -214,6 +265,7 @@
         .btn-stop { background: var(--danger); }
         .btn-reset { background: #475569; }
         .btn-primary { background: var(--accent); width: 100%; padding: 12px; font-size: 0.9rem; border-radius: 10px; margin-top: 8px; }
+        .btn-guided-main { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #04240f; font-weight: 800; padding: 14px; font-size: 0.95rem; border-radius: 12px; width: 100%; }
 
         /* Botões de Auditoria */
         .btn-audit {
@@ -334,18 +386,25 @@
     <main class="container">
         <!-- ABA: HOJE -->
         <section id="section-hoje" class="section active">
-            <!-- Card: Bloco A - Auditoria a Frio (1º Tiro Pós-Sono) -->
-            <div class="card">
-                <h2>❄️ Auditoria a Frio (1º Tiro) <span id="auditBadgeCount" class="badge warn">0 pendentes</span></h2>
-                <p style="margin-bottom: 10px;">Teste imediato sem aquecimento para aferir a consolidação sináptica pós-sono.</p>
+            <!-- Card Principal: Sessão Guiada 1-Clique (Pipeline de 5 Blocos) -->
+            <div class="card" id="guidedSessionCard">
+                <h2>🎯 Sessão Guiada do Dia <span class="badge info">Plug & Play</span></h2>
+                <div id="guidedSessionContent">
+                    <!-- Renderizado dinamicamente pelo sessionPlayer.js -->
+                </div>
+            </div>
+
+            <!-- Card: Auditoria a Frio Avulsa (Sentinela do Bloco A) -->
+            <div class="card" id="coldAuditCard">
+                <h2>❄️ Auditorias a Frio Pendentes <span id="auditBadgeCount" class="badge warn">0 pendentes</span></h2>
                 <div id="auditListContainer">
                     <!-- Renderizado dinamicamente pelo app.js -->
                 </div>
             </div>
 
-            <!-- Card de Cronômetro -->
+            <!-- Card de Cronômetro de Foco Livre -->
             <div class="card">
-                <h2>⏱️ Cronômetro de Foco <span class="badge info">Sessão</span></h2>
+                <h2>⏱️ Cronômetro Livre <span class="badge info">Sessão</span></h2>
                 <div class="timer-box">
                     <span id="timerDisplay" class="timer-display">00:00</span>
                     <div class="btn-group">
@@ -354,7 +413,6 @@
                         <button class="btn btn-reset" data-action="reset-timer">Reset</button>
                     </div>
                 </div>
-                <p>Mantenha o foco em execuções limpas e intervalos de recuperação neural.</p>
             </div>
 
             <!-- Card de Resumo Diário -->
@@ -402,6 +460,7 @@
     <script src="state.js"></script>
     <script src="repertoire.js"></script>
     <script src="neuroEngine.js"></script>
+    <script src="sessionPlayer.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
