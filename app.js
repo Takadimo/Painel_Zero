@@ -1,5 +1,5 @@
 /**
- * Arquivo principal de controle da UI, Cronômetro, Cadastro de Peças e Delegação de Eventos
+ * Arquivo principal de controle da UI, Cronômetro, Cadastro, Histórico e Delegação de Eventos
  */
 
 let practiceTimerInterval = null;
@@ -25,22 +25,35 @@ function switchTab(targetTabId) {
 
     if (targetTabId === 'tab-hoje' || targetTabId === 'tab-pecas') {
         renderDynamicContent();
+    } else if (targetTabId === 'tab-config') {
+        updateDebugView();
     }
 }
 
-// Renderiza dinamicamente as peças, o formulário e os trechos na interface
+// Renderiza dinamicamente as peças, o formulário, o cronômetro e o histórico recente na interface
 function renderDynamicContent() {
     const repertoire = Repertoire.getRepertoire();
     const currentState = State.getState();
     
-    // Injeta o bloco do Cronômetro e Trechos na Aba Hoje
+    // Injeta o bloco do Cronômetro, Resumo da Sessão e Trechos na Aba Hoje
     const hojeContainer = document.getElementById('trechos-hoje-container');
     if (hojeContainer) {
+        // Conta quantas avaliações foram feitas nesta sessão (baseado no histórico)
+        let totalAvaliacoesSessao = 0;
+        if (currentState.history) {
+            Object.values(currentState.history).forEach(arrayAvaliacoes => {
+                totalAvaliacoesSessao += arrayAvaliacoes.length;
+            });
+        }
+
         let timerHtml = `
             <div style="background: #0f172a; border: 1px solid #334155; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                 <h3 style="margin: 0 0 10px 0; color: #38bdf8;">⏱️ Cronômetro de Prática</h3>
                 <div id="display-cronometro" style="font-size: 2.5em; font-weight: bold; font-family: monospace; color: #f8fafc; margin-bottom: 15px;">
                     ${formatTime(currentState.sessionTime || 0)}
+                </div>
+                <div style="font-size: 0.9em; color: #94a3b8; margin-bottom: 15px;">
+                    Blocos avaliados nesta sessão: <strong style="color: #38bdf8;">${totalAvaliacoesSessao}</strong>
                 </div>
                 <div>
                     <button class="btn-action" data-action="toggle-timer" style="background-color: ${currentState.isPracticing ? '#ef4444' : '#22c55e'}; padding: 10px 20px; font-size: 1em; border: none; border-radius: 6px; color: white; cursor: pointer;">
@@ -74,7 +87,7 @@ function renderDynamicContent() {
         }
     }
 
-    // Renderiza na Aba Peças (Com lista e formulário de cadastro)
+    // Renderiza na Aba Peças
     const pecasContainer = document.getElementById('lista-pecas-container');
     if (pecasContainer) {
         let formHtml = `
@@ -119,7 +132,7 @@ function renderDynamicContent() {
     }
 }
 
-// Atualiza o painel de debug na aba de configurações
+// Atualiza o painel de debug e histórico na aba de configurações
 function updateDebugView() {
     const debugPre = document.getElementById('state-debug');
     if (debugPre) {
@@ -173,8 +186,8 @@ document.addEventListener('click', (event) => {
                 state.history[timestamp].push({ pieceId, blockId, result });
             });
             
-            alert(`Avaliação registrada com sucesso: ${result.toUpperCase()}! Salvo no navegador.`);
-            updateDebugView();
+            // Atualiza a visualização caso esteja na aba ativa
+            renderDynamicContent();
             break;
 
         case 'toggle-timer':
@@ -230,7 +243,7 @@ document.addEventListener('submit', (event) => {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Fase 4 carregada: Formulário de cadastro de peças integrado.');
+    console.log('Fase 5 carregada: Histórico e contador de avaliações integrados.');
     renderDynamicContent();
     setupTimerEngine();
 });
