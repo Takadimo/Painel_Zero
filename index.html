@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estudos - Piano & Acordeon (V2)</title>
+    <title>Painel de Estudos - Piano & Acordeon (V3)</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -15,6 +15,7 @@
             --accent2: #22c55e;
             --warn: #f59e0b;
             --danger: #ef4444;
+            --purple: #8b5cf6;
             --text: #e2e8f0;
             --text-muted: #94a3b8;
             --border: #334155;
@@ -63,20 +64,22 @@
         /* Abas de Navegação */
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             padding: 0 16px 14px;
             max-width: 650px;
             margin: 0 auto;
+            overflow-x: auto;
         }
 
         .tab-btn {
             flex: 1;
+            min-width: 75px;
             background: var(--card);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            padding: 10px 8px;
+            padding: 10px 6px;
             border-radius: 12px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
@@ -159,7 +162,7 @@
         .badge.warn { background: var(--warn); color: #3a2600; }
         .badge.info { background: var(--accent); color: #ffffff; }
         .badge.danger { background: var(--danger); color: #ffffff; }
-        .badge.locked { background: #475569; color: #cbd5e1; }
+        .badge.purple { background: var(--purple); color: #ffffff; }
 
         /* Badges das Caixas Leitner */
         .box-badge {
@@ -176,7 +179,7 @@
         .box-4 { background: var(--box4); }
         .box-5 { background: var(--box5); }
 
-        /* Banner Pedagógico da Sessão Guiada */
+        /* Banner Pedagógico */
         .pedagogical-banner {
             background: rgba(59, 130, 246, 0.12);
             border-left: 4px solid var(--accent);
@@ -226,6 +229,41 @@
             margin-top: 12px;
         }
 
+        /* Barra de Respiração / Micro-Replay 10s */
+        .replay-bar-wrap {
+            height: 6px;
+            background: #0f172a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .replay-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #22c55e);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Partitura / Prompt Area */
+        .sheet-container {
+            background: #0b1220;
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .sheet-hidden {
+            background: #1e1b4b;
+            border-color: #6366f1;
+            color: #c7d2fe;
+        }
+
         /* Cronômetro e Controles */
         .timer-box {
             display: flex;
@@ -266,12 +304,13 @@
         .btn-reset { background: #475569; }
         .btn-primary { background: var(--accent); width: 100%; padding: 12px; font-size: 0.9rem; border-radius: 10px; margin-top: 8px; }
         .btn-guided-main { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #04240f; font-weight: 800; padding: 14px; font-size: 0.95rem; border-radius: 12px; width: 100%; }
+        .btn-sandwich-main { background: linear-gradient(90deg, #8b5cf6, #ec4899); color: #ffffff; font-weight: 800; padding: 12px; font-size: 0.9rem; border-radius: 10px; width: 100%; }
 
-        /* Botões de Auditoria */
+        /* Botões de Auditoria & Prática */
         .btn-audit {
             flex: 1;
-            padding: 8px 4px;
-            font-size: 0.75rem;
+            padding: 10px 6px;
+            font-size: 0.8rem;
             font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
@@ -361,7 +400,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 8px;
+            padding: 8px;
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -379,6 +418,7 @@
     <!-- Barra de Navegação de Abas -->
     <nav class="tabs">
         <button class="tab-btn active" data-action="switch-tab" data-tab="hoje">Hoje</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="sanduiche">Sanduíche</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="pecas">Peças</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="config">Configurações</button>
     </nav>
@@ -386,23 +426,23 @@
     <main class="container">
         <!-- ABA: HOJE -->
         <section id="section-hoje" class="section active">
-            <!-- Card Principal: Sessão Guiada 1-Clique (Pipeline de 5 Blocos) -->
+            <!-- Card Principal: Sessão Guiada 1-Clique -->
             <div class="card" id="guidedSessionCard">
                 <h2>🎯 Sessão Guiada do Dia <span class="badge info">Plug & Play</span></h2>
                 <div id="guidedSessionContent">
-                    <!-- Renderizado dinamicamente pelo sessionPlayer.js -->
+                    <!-- Renderizado pelo sessionPlayer.js -->
                 </div>
             </div>
 
-            <!-- Card: Auditoria a Frio Avulsa (Sentinela do Bloco A) -->
+            <!-- Card: Auditoria a Frio Avulsa -->
             <div class="card" id="coldAuditCard">
                 <h2>❄️ Auditorias a Frio Pendentes <span id="auditBadgeCount" class="badge warn">0 pendentes</span></h2>
                 <div id="auditListContainer">
-                    <!-- Renderizado dinamicamente pelo app.js -->
+                    <!-- Renderizado pelo app.js -->
                 </div>
             </div>
 
-            <!-- Card de Cronômetro de Foco Livre -->
+            <!-- Card de Cronômetro Livre -->
             <div class="card">
                 <h2>⏱️ Cronômetro Livre <span class="badge info">Sessão</span></h2>
                 <div class="timer-box">
@@ -435,12 +475,22 @@
             </div>
         </section>
 
+        <!-- ABA: SANDUÍCHE (PRÁTICA EM BLOCO INTERCALADA) -->
+        <section id="section-sanduiche" class="section">
+            <div class="card" id="sandwichSessionCard">
+                <h2>🥪 Sessão Sanduíche <span class="badge purple">3 Rounds + 2 Intervalos</span></h2>
+                <div id="sandwichContainer">
+                    <!-- Renderizado dinamicamente pelo sandwichPlayer.js -->
+                </div>
+            </div>
+        </section>
+
         <!-- ABA: PEÇAS -->
         <section id="section-pecas" class="section">
             <div class="card">
                 <h2>🎵 Repertório & Caixas Leitner</h2>
                 <div id="repertoireList">
-                    <!-- Preenchido dinamicamente pelo repertoire.js e app.js -->
+                    <!-- Renderizado pelo app.js -->
                 </div>
             </div>
         </section>
@@ -461,6 +511,7 @@
     <script src="repertoire.js"></script>
     <script src="neuroEngine.js"></script>
     <script src="sessionPlayer.js"></script>
+    <script src="sandwichPlayer.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
