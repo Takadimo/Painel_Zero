@@ -1,6 +1,6 @@
 /**
  * sessionPlayer.js - Controlador do Player da Sessão Guiada (1-Clique)
- * Painel de Estudos de Piano & Acordeon (Versão 4)
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 let blockTimerInterval = null;
