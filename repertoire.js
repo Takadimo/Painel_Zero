@@ -1,11 +1,6 @@
 /**
- * repertoire.js - Matriz Dinâmica de Repertório e Microblocos
- * Painel de Estudos de Piano & Acordeon (Versão 0)
- * 
- * Taxonomia de Microblocos: XX.Y.ZZ-WW
- * - XX: Número da Peça (ex: 12, 13)
- * - Y: Passo do Fatiamento (1 = 4 comp, 2 = 8 comp, 3 = 12 comp, etc.)
- * - ZZ-WW: Intervalo de Compassos (ex: 1-4, 5-8, 1-8)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 1)
+ * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
 const DEFAULT_REPERTOIRE = {
@@ -20,7 +15,6 @@ const DEFAULT_REPERTOIRE = {
       phase: "Fatiamento Progressivo",
       isPaused: false,
       totalPracticeSeconds: 1920,
-      sheetUrl: "",
       trechos: [
         {
           id: "12.1.1-4",
@@ -33,8 +27,7 @@ const DEFAULT_REPERTOIRE = {
           slips: 0,
           consecutiveColdPasses: 1,
           lifetimeHits: 9,
-          lifetimeAttempts: 10,
-          sheetThumbnail: ""
+          lifetimeAttempts: 10
         },
         {
           id: "12.1.5-8",
@@ -47,12 +40,11 @@ const DEFAULT_REPERTOIRE = {
           slips: 0,
           consecutiveColdPasses: 1,
           lifetimeHits: 8,
-          lifetimeAttempts: 9,
-          sheetThumbnail: ""
+          lifetimeAttempts: 9
         },
         {
           id: "12.2.1-8",
-          label: "12.2.1-8 (Encadeamento)",
+          label: "12.2.1-8",
           passo: 2,
           compassos: "1-8",
           box: 1,
@@ -61,8 +53,7 @@ const DEFAULT_REPERTOIRE = {
           slips: 1,
           consecutiveColdPasses: 0,
           lifetimeHits: 5,
-          lifetimeAttempts: 8,
-          sheetThumbnail: ""
+          lifetimeAttempts: 8
         }
       ]
     },
@@ -76,7 +67,6 @@ const DEFAULT_REPERTOIRE = {
       phase: "Primeira Aquisição",
       isPaused: false,
       totalPracticeSeconds: 1200,
-      sheetUrl: "",
       trechos: [
         {
           id: "13.1.1-4",
@@ -89,8 +79,7 @@ const DEFAULT_REPERTOIRE = {
           slips: 0,
           consecutiveColdPasses: 0,
           lifetimeHits: 6,
-          lifetimeAttempts: 7,
-          sheetThumbnail: ""
+          lifetimeAttempts: 7
         },
         {
           id: "13.1.5-8",
@@ -103,8 +92,7 @@ const DEFAULT_REPERTOIRE = {
           slips: 0,
           consecutiveColdPasses: 0,
           lifetimeHits: 4,
-          lifetimeAttempts: 5,
-          sheetThumbnail: ""
+          lifetimeAttempts: 5
         }
       ]
     }
@@ -125,9 +113,6 @@ const DEFAULT_REPERTOIRE = {
 };
 
 class RepertoireManagerClass {
-  /**
-   * Garante que o repertório esteja carregado no StateManager
-   */
   initRepertoire() {
     const state = window.StateManager.getState();
     if (!state.repertoire || !state.repertoire.active || state.repertoire.active.length === 0) {
@@ -135,39 +120,38 @@ class RepertoireManagerClass {
     }
   }
 
-  /**
-   * Retorna as peças ativas
-   */
   getActivePieces() {
     const state = window.StateManager.getState();
     return (state.repertoire && state.repertoire.active) ? state.repertoire.active : [];
   }
 
   /**
-   * Retorna todos os trechos devidos para auditoria (Leitner D+N)
+   * Atualiza um trecho específico de uma peça
    */
-  getDueAudits() {
-    const activePieces = this.getActivePieces();
-    const today = new Date().toISOString().split("T")[0];
-    const dueList = [];
+  updateTrecho(pieceId, trechoId, trechoUpdates) {
+    window.StateManager.setState(prev => {
+      const active = (prev.repertoire && prev.repertoire.active) ? [...prev.repertoire.active] : [];
+      const pieceIndex = active.findIndex(p => p.id === pieceId);
+      if (pieceIndex === -1) return prev;
 
-    activePieces.forEach(piece => {
-      if (piece.isPaused) return;
-      (piece.trechos || []).forEach(trecho => {
-        if (trecho.box >= 1 && trecho.nextReviewDate <= today) {
-          dueList.push({
-            pieceId: piece.id,
-            pieceTitle: piece.title,
-            trecho: trecho
-          });
+      const piece = { ...active[pieceIndex] };
+      const trechos = [...(piece.trechos || [])];
+      const tIndex = trechos.findIndex(t => t.id === trechoId);
+      if (tIndex === -1) return prev;
+
+      trechos[tIndex] = { ...trechos[tIndex], ...trechoUpdates };
+      piece.trechos = trechos;
+      active[pieceIndex] = piece;
+
+      return {
+        repertoire: {
+          ...prev.repertoire,
+          active
         }
-      });
-    });
-
-    return dueList;
+      };
+    }, `UPDATE_TRECHO_${trechoId}`);
   }
 }
 
-// Instância global
 window.RepertoireManager = new RepertoireManagerClass();
 
