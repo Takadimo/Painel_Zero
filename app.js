@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 4)
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 let timerInterval = null;
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos V4 inicializado.");
+    console.log("[App] Painel de Estudos V5 inicializado.");
 });
 
 /**
@@ -54,6 +54,11 @@ function renderApp(state) {
     // Renderiza a Aba Leitura
     if (window.ReadingManager) {
         window.ReadingManager.renderUI(state);
+    }
+
+    // Renderiza a Aba Progresso (Gráficos SVG & Telemetria)
+    if (window.ChartsManager) {
+        window.ChartsManager.renderAll(state);
     }
 
     renderColdAudits(state);
@@ -202,7 +207,6 @@ function renderRepertoireView(state) {
  * Delegação Global de Eventos
  */
 function setupGlobalEventListeners() {
-    // Eventos de Clique
     document.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-action]");
         if (!btn) return;
@@ -213,12 +217,22 @@ function setupGlobalEventListeners() {
         const category = btn.dataset.category;
         const itemId = btn.dataset.id;
         const checkItem = btn.dataset.item;
+        const filterVal = btn.dataset.filter;
 
         switch (action) {
             case "switch-tab":
                 const targetTab = btn.dataset.tab;
                 if (targetTab) {
                     window.StateManager.setState({ activeTab: targetTab }, "SWITCH_TAB");
+                }
+                break;
+
+            // Filtros de Tempo (Aba Progresso)
+            case "filter-time":
+                if (filterVal) {
+                    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    window.StateManager.setState({ timeFilter: filterVal }, "CHANGE_TIME_FILTER");
                 }
                 break;
 
@@ -321,7 +335,6 @@ function setupGlobalEventListeners() {
         }
     });
 
-    // Eventos de Change (Select de Leitura)
     document.addEventListener("change", (e) => {
         if (e.target.id === "faberSelect") {
             const exId = e.target.value;
