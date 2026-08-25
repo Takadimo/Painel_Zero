@@ -1,72 +1,173 @@
 /**
- * Matriz Dinâmica Avançada de Repertório e Microblocos
- * Suporta múltiplos blocos por peça, marcação de compassos e controle de status.
+ * repertoire.js - Matriz Dinâmica de Repertório e Microblocos
+ * Painel de Estudos de Piano & Acordeon (Versão 0)
+ * 
+ * Taxonomia de Microblocos: XX.Y.ZZ-WW
+ * - XX: Número da Peça (ex: 12, 13)
+ * - Y: Passo do Fatiamento (1 = 4 comp, 2 = 8 comp, 3 = 12 comp, etc.)
+ * - ZZ-WW: Intervalo de Compassos (ex: 1-4, 5-8, 1-8)
  */
 
-const INITIAL_REPERTOIRE = [
+const DEFAULT_REPERTOIRE = {
+  active: [
     {
-        id: "czerny_823_1",
-        title: "Exercício Op. 823",
-        composer: "Carl Czerny",
-        blocks: [
-            { id: "c823_1_4", compass: "1-4", type: "Microbloco", status: "Em Estudo" },
-            { id: "c823_5_8", compass: "5-8", type: "Microbloco", status: "Novo" },
-            { id: "c823_9_12", compass: "9-12", type: "Microbloco", status: "Novo" }
-        ]
+      id: "p12",
+      number: 12,
+      title: "12. Bourrée",
+      composer: "Ya. Sen-Lyuk",
+      targetBpm: "60 → 100",
+      currentBpm: 60,
+      phase: "Fatiamento Progressivo",
+      isPaused: false,
+      totalPracticeSeconds: 1920,
+      sheetUrl: "",
+      trechos: [
+        {
+          id: "12.1.1-4",
+          label: "12.1.1-4",
+          passo: 1,
+          compassos: "1-4",
+          box: 2,
+          consolidated: true,
+          nextReviewDate: new Date().toISOString().split("T")[0],
+          slips: 0,
+          consecutiveColdPasses: 1,
+          lifetimeHits: 9,
+          lifetimeAttempts: 10,
+          sheetThumbnail: ""
+        },
+        {
+          id: "12.1.5-8",
+          label: "12.1.5-8",
+          passo: 1,
+          compassos: "5-8",
+          box: 2,
+          consolidated: true,
+          nextReviewDate: new Date().toISOString().split("T")[0],
+          slips: 0,
+          consecutiveColdPasses: 1,
+          lifetimeHits: 8,
+          lifetimeAttempts: 9,
+          sheetThumbnail: ""
+        },
+        {
+          id: "12.2.1-8",
+          label: "12.2.1-8 (Encadeamento)",
+          passo: 2,
+          compassos: "1-8",
+          box: 1,
+          consolidated: false,
+          nextReviewDate: new Date().toISOString().split("T")[0],
+          slips: 1,
+          consecutiveColdPasses: 0,
+          lifetimeHits: 5,
+          lifetimeAttempts: 8,
+          sheetThumbnail: ""
+        }
+      ]
     },
     {
-        id: "burgmuller_109_1",
-        title: "Études de Expression Op. 109",
-        composer: "Johann Friedrich Burgmüller",
-        blocks: [
-            { id: "bg109_1_4", compass: "1-4", type: "Frase Principal", status: "Consolidado" },
-            { id: "bg109_5_8", compass: "5-8", type: "Frase Principal", status: "Em Estudo" }
-        ]
-    }
-];
-
-class RepertoireManager {
-    constructor() {
-        const stateRepertoire = State.getState().repertoire;
-        if (!stateRepertoire || stateRepertoire.length === 0) {
-            State.updateState(state => {
-                state.repertoire = INITIAL_REPERTOIRE;
-            });
+      id: "p13",
+      number: 13,
+      title: "13. Minuet",
+      composer: "Johann Krieger",
+      targetBpm: "50 → 80",
+      currentBpm: 50,
+      phase: "Primeira Aquisição",
+      isPaused: false,
+      totalPracticeSeconds: 1200,
+      sheetUrl: "",
+      trechos: [
+        {
+          id: "13.1.1-4",
+          label: "13.1.1-4",
+          passo: 1,
+          compassos: "1-4",
+          box: 1,
+          consolidated: false,
+          nextReviewDate: new Date().toISOString().split("T")[0],
+          slips: 0,
+          consecutiveColdPasses: 0,
+          lifetimeHits: 6,
+          lifetimeAttempts: 7,
+          sheetThumbnail: ""
+        },
+        {
+          id: "13.1.5-8",
+          label: "13.1.5-8",
+          passo: 1,
+          compassos: "5-8",
+          box: 1,
+          consolidated: false,
+          nextReviewDate: new Date().toISOString().split("T")[0],
+          slips: 0,
+          consecutiveColdPasses: 0,
+          lifetimeHits: 4,
+          lifetimeAttempts: 5,
+          sheetThumbnail: ""
         }
+      ]
     }
+  ],
+  paused: [],
+  queue: [
+    {
+      id: "p14",
+      number: 14,
+      title: "14. Arabesque",
+      composer: "Friedrich Burgmüller",
+      targetBpm: "70 → 110",
+      phase: "Fila de Estudo",
+      trechos: []
+    }
+  ],
+  completed: []
+};
 
-    getRepertoire() {
-        return State.getState().repertoire || [];
+class RepertoireManagerClass {
+  /**
+   * Garante que o repertório esteja carregado no StateManager
+   */
+  initRepertoire() {
+    const state = window.StateManager.getState();
+    if (!state.repertoire || !state.repertoire.active || state.repertoire.active.length === 0) {
+      window.StateManager.setState({ repertoire: DEFAULT_REPERTOIRE }, "INIT_DEFAULT_REPERTOIRE");
     }
+  }
 
-    addPiece(pieceData) {
-        State.updateState(state => {
-            if (!state.repertoire) state.repertoire = [];
-            state.repertoire.push(pieceData);
-        });
-    }
+  /**
+   * Retorna as peças ativas
+   */
+  getActivePieces() {
+    const state = window.StateManager.getState();
+    return (state.repertoire && state.repertoire.active) ? state.repertoire.active : [];
+  }
 
-    addBlockToPiece(pieceId, blockData) {
-        State.updateState(state => {
-            const piece = state.repertoire.find(p => p.id === pieceId);
-            if (piece) {
-                if (!piece.blocks) piece.blocks = [];
-                piece.blocks.push(blockData);
-            }
-        });
-    }
+  /**
+   * Retorna todos os trechos devidos para auditoria (Leitner D+N)
+   */
+  getDueAudits() {
+    const activePieces = this.getActivePieces();
+    const today = new Date().toISOString().split("T")[0];
+    const dueList = [];
 
-    updateBlockStatus(pieceId, blockId, newStatus) {
-        State.updateState(state => {
-            const piece = state.repertoire.find(p => p.id === pieceId);
-            if (piece && piece.blocks) {
-                const block = piece.blocks.find(b => b.id === blockId);
-                if (block) {
-                    block.status = newStatus;
-                }
-            }
-        });
-    }
+    activePieces.forEach(piece => {
+      if (piece.isPaused) return;
+      (piece.trechos || []).forEach(trecho => {
+        if (trecho.box >= 1 && trecho.nextReviewDate <= today) {
+          dueList.push({
+            pieceId: piece.id,
+            pieceTitle: piece.title,
+            trecho: trecho
+          });
+        }
+      });
+    });
+
+    return dueList;
+  }
 }
 
-const Repertoire = new RepertoireManager();
+// Instância global
+window.RepertoireManager = new RepertoireManagerClass();
+
