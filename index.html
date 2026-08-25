@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estudos - Piano & Acordeon (V5)</title>
+    <title>Painel de Estudos - Piano & Acordeon (V6 Final)</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -64,22 +64,22 @@
         /* Abas de Navegação */
         .tabs {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             padding: 0 16px 14px;
-            max-width: 760px;
+            max-width: 800px;
             margin: 0 auto;
             overflow-x: auto;
         }
 
         .tab-btn {
             flex: 1;
-            min-width: 68px;
+            min-width: 65px;
             background: var(--card);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            padding: 10px 3px;
+            padding: 10px 2px;
             border-radius: 12px;
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
@@ -101,7 +101,7 @@
         /* Container Principal */
         .container {
             padding: 0 16px;
-            max-width: 760px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -180,7 +180,7 @@
         .box-4 { background: var(--box4); }
         .box-5 { background: var(--box5); }
 
-        /* Banner Pedagógico */
+        /* Banners e Progressos */
         .pedagogical-banner {
             background: rgba(59, 130, 246, 0.12);
             border-left: 4px solid var(--accent);
@@ -192,7 +192,6 @@
             line-height: 1.4;
         }
 
-        /* Barra de Progresso dos Blocos */
         .blocks-progress {
             display: flex;
             gap: 6px;
@@ -262,6 +261,48 @@
             color: #c7d2fe;
         }
 
+        /* Formulários e Inputs */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .form-control {
+            width: 100%;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Tabela de Histórico */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 8px;
+        }
+        .history-table th, .history-table td {
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .history-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
         /* Split View da Aba Leitura */
         .split-view-container {
             display: grid;
@@ -292,7 +333,6 @@
             padding: 14px;
         }
 
-        /* Checklist 60s */
         .checklist-item {
             display: flex;
             align-items: center;
@@ -309,7 +349,6 @@
             height: 16px;
         }
 
-        /* Heatmap Grid */
         .heatmap-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -327,13 +366,11 @@
             justify-content: center;
             font-size: 0.65rem;
             color: var(--text-muted);
-            transition: all 0.2s ease;
         }
         .heatmap-day.lvl-1 { background: rgba(59, 130, 246, 0.3); color: #93c5fd; }
         .heatmap-day.lvl-2 { background: rgba(59, 130, 246, 0.6); color: #fff; }
         .heatmap-day.lvl-3 { background: var(--accent2); color: #04240f; font-weight: 700; }
 
-        /* Filtros da Central de Tempo */
         .time-filters {
             display: flex;
             gap: 6px;
@@ -395,6 +432,8 @@
         .btn-stop { background: var(--danger); }
         .btn-reset { background: #475569; }
         .btn-primary { background: var(--accent); width: 100%; padding: 12px; font-size: 0.9rem; border-radius: 10px; margin-top: 8px; }
+        .btn-cloud-push { background: var(--accent); color: #ffffff; font-weight: 700; }
+        .btn-cloud-pull { background: var(--purple); color: #ffffff; font-weight: 700; }
         .btn-guided-main { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #04240f; font-weight: 800; padding: 14px; font-size: 0.95rem; border-radius: 12px; width: 100%; }
         .btn-sandwich-main { background: linear-gradient(90deg, #8b5cf6, #ec4899); color: #ffffff; font-weight: 800; padding: 12px; font-size: 0.9rem; border-radius: 10px; width: 100%; }
 
@@ -511,6 +550,7 @@
         <button class="tab-btn" data-action="switch-tab" data-tab="tecnica">Técnica</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="leitura">Leitura</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="progresso">Progresso</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="log">Log & Nuvem</button>
         <button class="tab-btn" data-action="switch-tab" data-tab="config">Config</button>
     </nav>
 
@@ -591,7 +631,7 @@
             </div>
         </section>
 
-        <!-- ABA: PROGRESSO (GRÁFICOS SVG & MATURIDADE) -->
+        <!-- ABA: PROGRESSO -->
         <section id="section-progresso" class="section">
             <div class="card">
                 <h2>🏔️ Pirâmide de Mielinização (Caixas Leitner) <span class="badge info">Maturidade</span></h2>
@@ -622,6 +662,97 @@
             </div>
         </section>
 
+        <!-- ABA: LOG & NUVEM (NOVA NA V6) -->
+        <section id="section-log" class="section">
+            <!-- 1. Central de Sincronização em Nuvem (Google Apps Script) -->
+            <div class="card">
+                <h2>☁️ Sincronização em Nuvem (1-Clique) <span class="badge info">Apps Script</span></h2>
+                <p style="margin-bottom: 12px;">Backup bidirecional assíncrono no seu Google Drive pessoal.</p>
+                
+                <div class="form-group">
+                    <label>URL do Web App (Google Apps Script):</label>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="cloudUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+                        <button class="btn btn-primary" style="width: auto; margin-top: 0;" data-action="save-cloud-url">Salvar URL</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button class="btn btn-cloud-push" style="flex: 1; padding: 12px;" data-action="cloud-push">
+                        ☁️ Enviar p/ Nuvem (Backup)
+                    </button>
+                    <button class="btn btn-cloud-pull" style="flex: 1; padding: 12px;" data-action="cloud-pull">
+                        📥 Puxar da Nuvem (Restaurar)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Registro Manual de Prática Acústica / Offline -->
+            <div class="card">
+                <h2>📝 Registro de Prática Acústica / Offline <span class="badge accent2">+XP</span></h2>
+                <p style="margin-bottom: 12px;">Lance estudos realizados no piano acústico longe do painel com rateio relacional de minutos.</p>
+                
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Pilar de Estudo:</label>
+                        <select id="offlinePilarSelect" class="form-control" data-action="change-offline-pilar">
+                            <option value="repertoire">🎵 Repertório</option>
+                            <option value="technical">⚙️ Técnica</option>
+                            <option value="reading">📖 Leitura</option>
+                            <option value="free">🎹 Prática Livre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Item / Peça Específica:</label>
+                        <select id="offlineItemSelect" class="form-control">
+                            <!-- Preenchido dinamicamente -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Duração (minutos):</label>
+                        <input type="number" id="offlineMinutesInput" class="form-control" placeholder="Ex: 30" min="1" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label>BPM Atingido (opcional):</label>
+                        <input type="number" id="offlineBpmInput" class="form-control" placeholder="Ex: 60">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Anotações da Sessão:</label>
+                    <input type="text" id="offlineNotesInput" class="form-control" placeholder="Ex: Foco no relaxamento do pulso e transição compasso 4-5">
+                </div>
+
+                <button class="btn btn-start" style="width: 100%; padding: 12px; font-weight: 700;" data-action="save-offline-practice">
+                    💾 Gravar Prática Acústica (+XP)
+                </button>
+            </div>
+
+            <!-- 3. Histórico Unificado -->
+            <div class="card">
+                <h2>📜 Histórico Unificado de Sessões</h2>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Item / Trecho</th>
+                                <th>Tempo</th>
+                                <th>Precisão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Preenchido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- ABA: CONFIGURAÇÕES -->
         <section id="section-config" class="section">
             <div class="card">
@@ -633,15 +764,17 @@
         </section>
     </main>
 
-    <!-- Carregamento dos Scripts Modulares -->
+    <!-- Carregamento dos Scripts Modulares (Ordem Canônica) -->
     <script src="state.js"></script>
     <script src="repertoire.js"></script>
     <script src="neuroEngine.js"></script>
     <script src="technical.js"></script>
     <script src="reading.js"></script>
     <script src="charts.js"></script>
+    <script src="cloudSync.js"></script>
     <script src="sessionPlayer.js"></script>
     <script src="sandwichPlayer.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
+End of literal HTML source code.
