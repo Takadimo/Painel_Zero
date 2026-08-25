@@ -1,14 +1,14 @@
 /**
- * neuroEngine.js - Motor Neurocientífico & Gerador Prescritivo (Versão 3)
+ * neuroEngine.js - Motor Neurocientífico & Gerador Prescritivo (Versão 4)
  */
 
 const LEITNER_INTERVALS_DAYS = {
   0: 0,
-  1: 1,  // D+1
-  2: 2,  // D+2
-  3: 4,  // D+4
-  4: 7,  // D+7
-  5: 14  // D+14
+  1: 1,
+  2: 2,
+  3: 4,
+  4: 7,
+  5: 14
 };
 
 const MAX_DAILY_COLD_AUDITS = 6;
@@ -56,9 +56,6 @@ class NeuroEngineClass {
     return dueList.slice(0, MAX_DAILY_COLD_AUDITS);
   }
 
-  /**
-   * Sorteia um exercício técnico para o intervalo de 90s com rodízio anti-repetição
-   */
   getRandomTechnicalExercise(lastCategory = null) {
     const state = window.StateManager.getState();
     const tech = state.technical || {};
@@ -70,6 +67,7 @@ class NeuroEngineClass {
 
     return {
       category: chosenCategory,
+      id: item.id,
       title: item.title,
       desc: item.desc,
       bpm: item.bpm || 60
@@ -84,7 +82,6 @@ class NeuroEngineClass {
 
     const blocks = [];
 
-    // [BLOCO A] ❄️ Auditoria a Frio
     if (dueAudits.length > 0) {
       blocks.push({
         id: "block-a",
@@ -96,7 +93,6 @@ class NeuroEngineClass {
       });
     }
 
-    // [BLOCO B] 🛠️ Micro-Reparo Condicional
     let highestIfmTrecho = null;
     let highestIfmPiece = null;
     let maxIfm = 1.2;
@@ -125,7 +121,6 @@ class NeuroEngineClass {
       });
     }
 
-    // [BLOCO C] 🎯 Aquisição em Sessão Sanduíche
     let acqPiece = pieces.find(p => !p.isPaused);
     let acqTrecho = acqPiece ? (acqPiece.trechos || []).find(t => t.passo === 1 && t.box <= 1) : null;
     if (!acqTrecho && acqPiece && acqPiece.trechos) acqTrecho = acqPiece.trechos[0];
@@ -142,7 +137,6 @@ class NeuroEngineClass {
       });
     }
 
-    // [BLOCO D] 🔗 Encadeamento Just-in-Time
     let chainPiece = pieces.find(p => !p.isPaused);
     let chainTrecho = chainPiece ? (chainPiece.trechos || []).find(t => t.passo === 2) : null;
 
@@ -162,7 +156,6 @@ class NeuroEngineClass {
       });
     }
 
-    // [BLOCO E] ⚙️ Bloco Técnico & Fechamento
     blocks.push({
       id: "block-e",
       tag: "Bloco E",
