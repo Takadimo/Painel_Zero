@@ -1,10 +1,10 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 1)
+ * Painel de Estudos de Piano & Acordeon (Versão 2)
  */
 
 const DEFAULT_STATE = {
-  version: "v1.0.0",
+  version: "v2.0.0",
   lastSaved: null,
   activeTab: "hoje",
   xp: 0,
@@ -47,11 +47,12 @@ const DEFAULT_STATE = {
   history: [],
   sessionState: {
     inProgress: false,
-    activePieceId: null,
-    activeTrechoId: null,
-    mode: null,
+    guidedActive: false,
+    currentBlockIndex: 0,
+    guidedBlocks: [],
+    cascadeRestrictionD: false, // Trava de segurança no Bloco D se houver falha no Bloco A
     startTime: null,
-    elapsedSeconds: 0
+    blockSeconds: 0
   }
 };
 
@@ -212,6 +213,5 @@ class StateManagerClass {
   }
 }
 
-// Instância global
 window.StateManager = new StateManagerClass();
 
