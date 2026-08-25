@@ -1,6 +1,6 @@
 /**
  * technical.js - Gerenciador do Pilar Técnico & Desafios de Velocidade
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 let techTimerInterval = null;
