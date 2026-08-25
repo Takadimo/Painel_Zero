@@ -1,10 +1,10 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 2)
+ * Painel de Estudos de Piano & Acordeon (Versão 3)
  */
 
 const DEFAULT_STATE = {
-  version: "v2.0.0",
+  version: "v3.0.0",
   lastSaved: null,
   activeTab: "hoje",
   xp: 0,
@@ -34,9 +34,17 @@ const DEFAULT_STATE = {
     completed: []
   },
   technical: {
-    scales: [],
-    arpeggios: [],
-    cadences: [],
+    scales: [
+      { title: "Escala Fá# Maior", desc: "Padrão Russo / 4 oitavas", bpm: 60 },
+      { title: "Escala Dó Maior", desc: "Movimento Contrário / 2 oitavas", bpm: 70 }
+    ],
+    arpeggios: [
+      { title: "Arpejo Fá menor", desc: "Posição Fundamental e 1ª Inversão", bpm: 60 },
+      { title: "Arpejo Dó menor", desc: "2ª Inversão", bpm: 60 }
+    ],
+    cadences: [
+      { title: "Cadência nos 12 Tons", desc: "Progressão Im - IVm - V7 - Im", bpm: 60 }
+    ],
     currentBpmHistory: {}
   },
   reading: {
@@ -50,9 +58,26 @@ const DEFAULT_STATE = {
     guidedActive: false,
     currentBlockIndex: 0,
     guidedBlocks: [],
-    cascadeRestrictionD: false, // Trava de segurança no Bloco D se houver falha no Bloco A
+    cascadeRestrictionD: false,
     startTime: null,
     blockSeconds: 0
+  },
+  sandwichState: {
+    active: false,
+    pieceId: null,
+    trechoId: null,
+    currentRound: 1, // 1 (Aquisição), 2 (Drop-the-prompt), 3 (Fixação)
+    targetHits: 3,    // 3 para nova aquisição / 5 para correção de vício
+    isCorrectingHabit: false,
+    isPromptDropped: false,
+    consecutiveHits: 0,
+    roundHits: 0,
+    roundMisses: 0,
+    sessionHits: 0,
+    sessionMisses: 0,
+    inInterval: false,
+    intervalSecondsRemaining: 90,
+    lastTechDrawn: null
   }
 };
 
