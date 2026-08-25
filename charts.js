@@ -1,17 +1,9 @@
 /**
  * charts.js - Gerador de Gráficos Nativos em SVG & Telemetria
- * Painel de Estudos de Piano & Acordeon (Versão 5)
- * 
- * - Pirâmide de Mielinização (Trapézio SVG das 5 Caixas Leitner)
- * - Círculo de Quintas (Radar SVG das 12 Tonalidades)
- * - Calendário de Consistência (Heatmap de 4 Semanas)
- * - Central Hierárquica de Distribuição de Tempo
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 class ChartsManagerClass {
-  /**
-   * 1. Renderiza a Pirâmide de Mielinização em Trapézio SVG Nativo
-   */
   renderLeitnerPyramid(state) {
     const container = document.getElementById("pyramidContainer");
     if (!container) return;
@@ -20,12 +12,12 @@ class ChartsManagerClass {
     const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
 
     const layers = [
-      { box: 5, label: "Caixa 5: Mielinização Plena / Longo Prazo", count: counts[5], color: "#ec4899", y: 10, h: 26, topW: 80, botW: 130 },
-      { box: 4, label: "Caixa 4: Retenção Semanal (D+7)", count: counts[4], color: "#f59e0b", y: 40, h: 26, topW: 134, botW: 184 },
-      { box: 3, label: "Caixa 3: Estabilidade Intermediária (D+4)", count: counts[3], color: "#10b981", y: 70, h: 26, topW: 188, botW: 238 },
-      { box: 2, label: "Caixa 2: Passo 2 Desbloqueado (D+2)", count: counts[2], color: "#06b6d4", y: 100, h: 26, topW: 242, botW: 292 },
-      { box: 1, label: "Caixa 1: Provação Pós-Sono (D+1)", count: counts[1], color: "#3b82f6", y: 130, h: 26, topW: 296, botW: 346 },
-      { box: 0, label: "Caixa 0: Entrada / Novos Microblocos", count: counts[0], color: "#64748b", y: 160, h: 26, topW: 350, botW: 400 }
+      { box: 5, label: "Caixa 5: Longo Prazo", count: counts[5], color: "#ec4899", y: 10, h: 26, topW: 80, botW: 130 },
+      { box: 4, label: "Caixa 4: D+7", count: counts[4], color: "#f59e0b", y: 40, h: 26, topW: 134, botW: 184 },
+      { box: 3, label: "Caixa 3: D+4", count: counts[3], color: "#10b981", y: 70, h: 26, topW: 188, botW: 238 },
+      { box: 2, label: "Caixa 2: D+2", count: counts[2], color: "#06b6d4", y: 100, h: 26, topW: 242, botW: 292 },
+      { box: 1, label: "Caixa 1: D+1", count: counts[1], color: "#3b82f6", y: 130, h: 26, topW: 296, botW: 346 },
+      { box: 0, label: "Caixa 0: Fila", count: counts[0], color: "#64748b", y: 160, h: 26, topW: 350, botW: 400 }
     ];
 
     const centerX = 210;
@@ -68,26 +60,15 @@ class ChartsManagerClass {
     `;
   }
 
-  /**
-   * 2. Renderiza o Radar do Círculo de Quintas das 12 Tonalidades em SVG
-   */
   renderCircleOfFifths(state) {
     const container = document.getElementById("circleOfFifthsContainer");
     if (!container) return;
 
     const tones = [
-      { name: "C", angle: 0 },
-      { name: "G", angle: 30 },
-      { name: "D", angle: 60 },
-      { name: "A", angle: 90 },
-      { name: "E", angle: 120 },
-      { name: "B", angle: 150 },
-      { name: "F#", angle: 180 },
-      { name: "Db", angle: 210 },
-      { name: "Ab", angle: 240 },
-      { name: "Eb", angle: 270 },
-      { name: "Bb", angle: 300 },
-      { name: "F", angle: 330 }
+      { name: "C", angle: 0 }, { name: "G", angle: 30 }, { name: "D", angle: 60 },
+      { name: "A", angle: 90 }, { name: "E", angle: 120 }, { name: "B", angle: 150 },
+      { name: "F#", angle: 180 }, { name: "Db", angle: 210 }, { name: "Ab", angle: 240 },
+      { name: "Eb", angle: 270 }, { name: "Bb", angle: 300 }, { name: "F", angle: 330 }
     ];
 
     const activeTones = ["C", "F#", "Am", "G", "Fm", "Cm"];
@@ -123,9 +104,6 @@ class ChartsManagerClass {
     `;
   }
 
-  /**
-   * 3. Renderiza o Calendário de Consistência (Heatmap de 4 Semanas)
-   */
   renderHeatmap(state) {
     const container = document.getElementById("heatmapContainer");
     if (!container) return;
@@ -133,14 +111,12 @@ class ChartsManagerClass {
     const days = [];
     const today = new Date();
 
-    // Gera os últimos 28 dias
     for (let i = 27; i >= 0; i--) {
       const d = new Date();
       d.setDate(today.getDate() - i);
       const dateStr = d.toLocaleDateString("pt-BR");
       const isToday = i === 0;
 
-      // Mock de minutos praticados
       let minutes = 0;
       if (isToday) minutes = (state.dailyStats && state.dailyStats.focusMinutes) || 20;
       else if (i === 1 || i === 3 || i === 4 || i === 7 || i === 8 || i === 12) minutes = 40;
@@ -178,9 +154,6 @@ class ChartsManagerClass {
     `;
   }
 
-  /**
-   * 4. Renderiza a Central Hierárquica de Tempo com Filtros
-   */
   renderTimeBreakdown(state) {
     const container = document.getElementById("timeBreakdownContainer");
     if (!container) return;
@@ -193,15 +166,9 @@ class ChartsManagerClass {
     let auditMin = (state.dailyStats && state.dailyStats.completedAudits * 2) || 4;
 
     if (filter === "week") {
-      repMin *= 4;
-      techMin *= 4;
-      readMin *= 4;
-      auditMin *= 4;
+      repMin *= 4; techMin *= 4; readMin *= 4; auditMin *= 4;
     } else if (filter === "total") {
-      repMin = 145;
-      techMin = 85;
-      readMin = 40;
-      auditMin = 38;
+      repMin = 145; techMin = 85; readMin = 40; auditMin = 38;
     }
 
     const total = repMin + techMin + readMin + auditMin || 1;
@@ -209,7 +176,6 @@ class ChartsManagerClass {
     container.innerHTML = `
       <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
         <div style="display: flex; flex-direction: column; gap: 10px;">
-          <!-- Repertório -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
               <span>🎵 Repertório Ativo</span>
@@ -220,7 +186,6 @@ class ChartsManagerClass {
             </div>
           </div>
 
-          <!-- Técnica -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
               <span>⚙️ Pilar Técnico (Escalas & Arpejos)</span>
@@ -231,7 +196,6 @@ class ChartsManagerClass {
             </div>
           </div>
 
-          <!-- Leitura -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
               <span>📖 Leitura à Primeira Vista (Faber)</span>
@@ -242,7 +206,6 @@ class ChartsManagerClass {
             </div>
           </div>
 
-          <!-- Auditorias a Frio -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
               <span>❄️ Auditorias a Frio (1º Tiro)</span>
