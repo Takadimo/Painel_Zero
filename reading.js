@@ -1,6 +1,6 @@
 /**
  * reading.js - Módulo de Leitura à Primeira Vista (Método Faber Piano Adventures 001 a 128)
- * Painel de Estudos de Piano & Acordeon (Versão 5)
+ * Painel de Estudos de Piano & Acordeon (Versão 6 Final)
  */
 
 const FABER_EXERCISES = [
