@@ -1,6 +1,6 @@
 /**
  * sandwichPlayer.js - Controlador do Modo de Prática em Bloco Sanduíche
- * Painel de Estudos de Piano & Acordeon (Versão 4)
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 let swTimerInterval = null;
@@ -237,7 +237,7 @@ class SandwichPlayerClass {
       },
       history: [
         {
-          date: new Date().toLocaleString("pt-BR"),
+          date: new Date().toLocaleDateString("pt-BR"),
           type: "Sessão Sanduíche",
           pieceId: sw.pieceId,
           trechoId: sw.trechoId,
