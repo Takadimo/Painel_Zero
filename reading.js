@@ -1,10 +1,6 @@
 /**
  * reading.js - Módulo de Leitura à Primeira Vista (Método Faber Piano Adventures 001 a 128)
- * Painel de Estudos de Piano & Acordeon (Versão 4)
- * 
- * - Checklist Pré-Leitura de 60 Segundos
- * - Split View Ergonômico (68% Partitura / 32% Controles)
- * - Sequenciamento Numérico Estrito
+ * Painel de Estudos de Piano & Acordeon (Versão 5)
  */
 
 const FABER_EXERCISES = [
@@ -115,7 +111,6 @@ class ReadingManagerClass {
     const isDone = completedList.includes(currentEx.id);
 
     container.innerHTML = `
-      <!-- Seletor de Exercícios Faber -->
       <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
         <label style="font-size: 0.82rem; color: var(--text-muted);">Exercício:</label>
         <select id="faberSelect" style="flex: 1; background: var(--card-inner); border: 1px solid var(--border); color: #fff; padding: 8px 10px; border-radius: 8px; font-size: 0.82rem;" data-action="change-faber-exercise">
@@ -127,9 +122,7 @@ class ReadingManagerClass {
         </select>
       </div>
 
-      <!-- Split View Ergonômico -->
       <div class="split-view-container">
-        <!-- 1. Visualizador de Partitura -->
         <div class="reading-sheet-viewer">
           <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px;">
             ${currentEx.title}
@@ -142,7 +135,6 @@ class ReadingManagerClass {
           </div>
         </div>
 
-        <!-- 2. Painel Lateral de Análise Prévia (60s) -->
         <div class="reading-controls-panel">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="font-size: 0.82rem; color: var(--warn); text-transform: uppercase;">
