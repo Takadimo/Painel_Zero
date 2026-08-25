@@ -1,10 +1,10 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon (Versão 3)
+ * Painel de Estudos de Piano & Acordeon (Versão 4)
  */
 
 const DEFAULT_STATE = {
-  version: "v3.0.0",
+  version: "v4.0.0",
   lastSaved: null,
   activeTab: "hoje",
   xp: 0,
@@ -35,15 +35,16 @@ const DEFAULT_STATE = {
   },
   technical: {
     scales: [
-      { title: "Escala Fá# Maior", desc: "Padrão Russo / 4 oitavas", bpm: 60 },
-      { title: "Escala Dó Maior", desc: "Movimento Contrário / 2 oitavas", bpm: 70 }
+      { id: "s1", title: "Escala Fá# Maior", desc: "Padrão Russo / 4 oitavas", bpm: 60, targetBpm: 90, totalMinutes: 0 },
+      { id: "s2", title: "Escala Dó Maior", desc: "Movimento Contrário / 2 oitavas", bpm: 70, targetBpm: 100, totalMinutes: 0 },
+      { id: "s3", title: "Escala Lá menor", desc: "Movimento Paralelo / 4 oitavas", bpm: 60, targetBpm: 80, totalMinutes: 0 }
     ],
     arpeggios: [
-      { title: "Arpejo Fá menor", desc: "Posição Fundamental e 1ª Inversão", bpm: 60 },
-      { title: "Arpejo Dó menor", desc: "2ª Inversão", bpm: 60 }
+      { id: "a1", title: "Arpejo Fá menor", desc: "Posição Fundamental e 1ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0 },
+      { id: "a2", title: "Arpejo Dó menor", desc: "2ª Inversão", bpm: 60, targetBpm: 80, totalMinutes: 0 }
     ],
     cadences: [
-      { title: "Cadência nos 12 Tons", desc: "Progressão Im - IVm - V7 - Im", bpm: 60 }
+      { id: "c1", title: "Cadência nos 12 Tons", desc: "Progressão Im - IVm - V7 - Im", bpm: 60, targetBpm: 72, totalMinutes: 0 }
     ],
     currentBpmHistory: {}
   },
@@ -66,8 +67,8 @@ const DEFAULT_STATE = {
     active: false,
     pieceId: null,
     trechoId: null,
-    currentRound: 1, // 1 (Aquisição), 2 (Drop-the-prompt), 3 (Fixação)
-    targetHits: 3,    // 3 para nova aquisição / 5 para correção de vício
+    currentRound: 1,
+    targetHits: 3,
     isCorrectingHabit: false,
     isPromptDropped: false,
     consecutiveHits: 0,
