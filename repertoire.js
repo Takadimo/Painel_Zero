@@ -1,5 +1,5 @@
 /**
- * repertoire.js - Matriz de Repertório & Microblocos (Versão 2)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 3)
  * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
@@ -22,6 +22,7 @@ const DEFAULT_REPERTOIRE = {
           passo: 1,
           compassos: "1-4",
           box: 2,
+          isCorrectingHabit: false,
           consolidated: true,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 0,
@@ -35,6 +36,7 @@ const DEFAULT_REPERTOIRE = {
           passo: 1,
           compassos: "5-8",
           box: 2,
+          isCorrectingHabit: false,
           consolidated: true,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 0,
@@ -49,6 +51,7 @@ const DEFAULT_REPERTOIRE = {
           compassos: "1-8",
           baseBlockIds: ["12.1.1-4", "12.1.5-8"],
           box: 1,
+          isCorrectingHabit: true, // Vício motor a corrigir (meta de 5 acertos)
           consolidated: false,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 1,
@@ -75,6 +78,7 @@ const DEFAULT_REPERTOIRE = {
           passo: 1,
           compassos: "1-4",
           box: 1,
+          isCorrectingHabit: false,
           consolidated: false,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 0,
@@ -88,6 +92,7 @@ const DEFAULT_REPERTOIRE = {
           passo: 1,
           compassos: "5-8",
           box: 1,
+          isCorrectingHabit: false,
           consolidated: false,
           nextReviewDate: new Date().toISOString().split("T")[0],
           slips: 0,
@@ -102,6 +107,7 @@ const DEFAULT_REPERTOIRE = {
           compassos: "1-8",
           baseBlockIds: ["13.1.1-4", "13.1.5-8"],
           box: 0,
+          isCorrectingHabit: false,
           consolidated: false,
           nextReviewDate: null,
           slips: 0,
@@ -140,9 +146,13 @@ class RepertoireManagerClass {
     return (state.repertoire && state.repertoire.active) ? state.repertoire.active : [];
   }
 
-  /**
-   * Verifica se os microblocos base de um trecho de Passo 2 estão consolidados (Caixa >= 2)
-   */
+  getPieceAndTrecho(pieceId, trechoId) {
+    const piece = this.getActivePieces().find(p => p.id === pieceId);
+    if (!piece) return { piece: null, trecho: null };
+    const trecho = (piece.trechos || []).find(t => t.id === trechoId);
+    return { piece, trecho };
+  }
+
   isPasso2Unlocked(pieceId, passo2TrechoId) {
     const piece = this.getActivePieces().find(p => p.id === pieceId);
     if (!piece) return false;
@@ -150,7 +160,6 @@ class RepertoireManagerClass {
     const targetTrecho = (piece.trechos || []).find(t => t.id === passo2TrechoId);
     if (!targetTrecho || !targetTrecho.baseBlockIds) return true;
 
-    // Todos os microblocos base devem estar em Caixa >= 2
     return targetTrecho.baseBlockIds.every(baseId => {
       const baseTrecho = piece.trechos.find(t => t.id === baseId);
       return baseTrecho && baseTrecho.box >= 2;
