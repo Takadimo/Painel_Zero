@@ -1,6 +1,6 @@
 /**
  * sessionPlayer.js - Controlador do Player da Sessão Guiada (1-Clique)
- * Painel de Estudos de Piano & Acordeon (Versão 2)
+ * Painel de Estudos de Piano & Acordeon (Versão 3)
  */
 
 let blockTimerInterval = null;
@@ -8,9 +8,6 @@ let blockSeconds = 0;
 let isBlockTimerRunning = false;
 
 class SessionPlayerClass {
-  /**
-   * Inicia a Sessão Guiada carregando os 5 blocos calculados pelo neuroEngine
-   */
   startSession() {
     if (!window.NeuroEngine) return;
     const blocks = window.NeuroEngine.generateDailyPipeline();
@@ -34,9 +31,6 @@ class SessionPlayerClass {
     this.startBlockTimer();
   }
 
-  /**
-   * Avança para o próximo bloco da sessão
-   */
   nextBlock() {
     const state = window.StateManager.getState();
     const session = state.sessionState;
@@ -64,9 +58,6 @@ class SessionPlayerClass {
     this.startBlockTimer();
   }
 
-  /**
-   * Volta para o bloco anterior
-   */
   prevBlock() {
     const state = window.StateManager.getState();
     const session = state.sessionState;
@@ -87,9 +78,6 @@ class SessionPlayerClass {
     this.startBlockTimer();
   }
 
-  /**
-   * Conclui a sessão guiada
-   */
   finishSession() {
     this.stopBlockTimer();
     const state = window.StateManager.getState();
@@ -102,7 +90,7 @@ class SessionPlayerClass {
     blockSeconds = 0;
 
     window.StateManager.setState(prev => ({
-      xp: (prev.xp || 0) + 50, // Bônus de conclusão de sessão guiada
+      xp: (prev.xp || 0) + 50,
       globalStats: {
         ...prev.globalStats,
         totalSessions: (prev.globalStats.totalSessions || 0) + 1
@@ -120,9 +108,6 @@ class SessionPlayerClass {
     alert("🎉 Sessão Guiada concluída com sucesso! +50 XP creditados.");
   }
 
-  /**
-   * Cancela ou encerra a sessão antecipadamente
-   */
   exitSession() {
     if (confirm("Deseja realmente encerrar a Sessão Guiada? O tempo praticado até aqui será salvo.")) {
       this.stopBlockTimer();
@@ -148,9 +133,6 @@ class SessionPlayerClass {
     }
   }
 
-  /**
-   * Cronômetro interno do bloco
-   */
   startBlockTimer() {
     if (isBlockTimerRunning) return;
     isBlockTimerRunning = true;
@@ -185,14 +167,10 @@ class SessionPlayerClass {
     const minutes = Math.ceil(blockSeconds / 60);
     if (minutes <= 0) return;
 
-    // Se for bloco de repertório, credita na peça
     if (block.pieceId && window.RepertoireManager) {
-      const piece = window.RepertoireManager.getActivePieces().find(p => p.id === block.pieceId);
-      if (piece) {
-        window.RepertoireManager.updateTrecho(block.pieceId, block.trechoId, {
-          tempoSegundos: ((block.trecho && block.trecho.tempoSegundos) || 0) + blockSeconds
-        });
-      }
+      window.RepertoireManager.updateTrecho(block.pieceId, block.trechoId, {
+        tempoSegundos: ((block.trecho && block.trecho.tempoSegundos) || 0) + blockSeconds
+      });
     }
   }
 
@@ -204,16 +182,12 @@ class SessionPlayerClass {
     el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
-  /**
-   * Renderiza a interface do card da Sessão Guiada na Aba Hoje
-   */
   renderUI(state) {
     const container = document.getElementById("guidedSessionContent");
     if (!container) return;
 
     const session = state.sessionState || {};
 
-    // 1. Estado Parado (Botão Iniciar)
     if (!session.guidedActive) {
       const blocks = window.NeuroEngine ? window.NeuroEngine.generateDailyPipeline() : [];
       const totalEstimatedMinutes = blocks.reduce((acc, b) => acc + (b.targetMinutes || 0), 0);
@@ -235,14 +209,12 @@ class SessionPlayerClass {
       return;
     }
 
-    // 2. Estado Em Andamento (Player dos 5 Blocos)
     const blocks = session.guidedBlocks || [];
     const currentIndex = session.currentBlockIndex || 0;
     const currentBlock = blocks[currentIndex] || {};
     const isLastBlock = currentIndex === blocks.length - 1;
 
     container.innerHTML = `
-      <!-- Barra de Progresso dos Blocos -->
       <div class="blocks-progress">
         ${blocks.map((b, idx) => {
           let statusClass = "";
@@ -252,12 +224,10 @@ class SessionPlayerClass {
         }).join('')}
       </div>
 
-      <!-- Banner com Justificativa Neurobiológica -->
       <div class="pedagogical-banner">
         💡 ${currentBlock.pedagogicalRationale || "Execute com total foco e andamento lento."}
       </div>
 
-      <!-- Player do Bloco Ativo -->
       <div class="player-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase;">
@@ -270,13 +240,17 @@ class SessionPlayerClass {
           ${currentBlock.title}
         </h3>
 
-        <!-- Cronômetro do Bloco -->
         <div class="timer-box" style="margin: 10px 0;">
           <span id="guidedTimerDisplay" class="timer-display">00:00</span>
           <span class="badge info">Bloco Ativo</span>
         </div>
 
-        <!-- Botões de Navegação do Player -->
+        ${currentBlock.id === "block-c" ? `
+          <button class="btn btn-sandwich-main" style="margin-bottom: 10px;" data-action="open-sandwich-from-block" data-piece="${currentBlock.pieceId}" data-trecho="${currentBlock.trechoId}">
+            🥪 Abrir na Sessão Sanduíche Dedicada
+          </button>
+        ` : ''}
+
         <div style="display: flex; gap: 8px; margin-top: 14px;">
           ${currentIndex > 0 ? `
             <button class="btn btn-reset" style="flex: 1;" data-action="prev-guided-block">
