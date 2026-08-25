@@ -1,5 +1,5 @@
 /**
- * repertoire.js - Matriz de Repertório & Microblocos (Versão 4)
+ * repertoire.js - Matriz de Repertório & Microblocos (Versão 5)
  * Taxonomia: XX.Y.ZZ-WW (Peça.Passo.Compassos)
  */
 
@@ -164,6 +164,21 @@ class RepertoireManagerClass {
       const baseTrecho = piece.trechos.find(t => t.id === baseId);
       return baseTrecho && baseTrecho.box >= 2;
     });
+  }
+
+  /**
+   * Retorna a contagem de trechos por Caixa Leitner (0 a 5) para a Pirâmide de Mielinização
+   */
+  getLeitnerDistribution() {
+    const counts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    this.getActivePieces().forEach(piece => {
+      (piece.trechos || []).forEach(t => {
+        const b = t.box !== undefined ? t.box : 0;
+        if (counts[b] !== undefined) counts[b]++;
+        else counts[0]++;
+      });
+    });
+    return counts;
   }
 
   updateTrecho(pieceId, trechoId, trechoUpdates) {
