@@ -1,11 +1,10 @@
 /**
  * state.js - Gerenciador Central de Estado Global (SSOT & Pub/Sub)
- * Painel de Estudos de Piano & Acordeon
+ * Painel de Estudos de Piano & Acordeon (Versão 0)
  */
 
-// Schema canônico padrão da aplicação
 const DEFAULT_STATE = {
-  version: "v24.0",
+  version: "v0.1.0",
   lastSaved: null,
   activeTab: "hoje",
   xp: 0,
@@ -24,7 +23,7 @@ const DEFAULT_STATE = {
   },
   weeklyGoals: {
     targetMinutes: 250,
-    repertoireFocus: "Consolidar trechos ativos e transições",
+    repertoireFocus: "Consolidar trechos de Passo 1 e Passo 2",
     technicalFocus: "Escalas e Arpejos fundamentais",
     readingTargetPieces: 5
   },
@@ -99,7 +98,6 @@ class StateManagerClass {
         this._state = deepMerge(DEFAULT_STATE, parsed);
         this._checkDailyReset();
       } else {
-        // Tenta migrar de versões legadas se existirem
         this._migrateLegacyStorage();
       }
     } catch (e) {
@@ -112,7 +110,7 @@ class StateManagerClass {
   }
 
   /**
-   * Verifica se o dia mudou para reiniciar os acumuladores diários
+   * Reinicia acumuladores diários caso a data mude
    */
   _checkDailyReset() {
     const today = new Date().toISOString().split("T")[0];
@@ -130,7 +128,7 @@ class StateManagerClass {
   }
 
   /**
-   * Migração retrocompatível de chaves das versões V22/V23 caso existam
+   * Migração de dados de versões anteriores caso existam
    */
   _migrateLegacyStorage() {
     const legacyV23 = localStorage.getItem("painelPiano_V23");
@@ -150,7 +148,7 @@ class StateManagerClass {
   }
 
   /**
-   * Retorna uma cópia imutável ou referência do estado atual
+   * Retorna o estado atual
    */
   getState() {
     if (!this._initialized) {
@@ -161,8 +159,6 @@ class StateManagerClass {
 
   /**
    * Atualiza o estado de forma atômica e notifica os ouvintes
-   * @param {Object|Function} updater Objeto parcial ou função (state) => newState
-   * @param {String} [actionLabel] Nome opcional da ação para debug/telemetria
    */
   setState(updater, actionLabel = "UPDATE_STATE") {
     const currentState = this.getState();
@@ -182,7 +178,7 @@ class StateManagerClass {
   }
 
   /**
-   * Persiste o estado atual no localStorage
+   * Persiste o estado no localStorage
    */
   persist() {
     try {
@@ -194,8 +190,6 @@ class StateManagerClass {
 
   /**
    * Inscreve um ouvinte para receber notificações de mudanças de estado
-   * @param {Function} callback Função que recebe (state, actionLabel)
-   * @returns {Function} Função para cancelar a inscrição
    */
   subscribe(callback) {
     if (typeof callback === "function") {
@@ -254,5 +248,6 @@ class StateManagerClass {
   }
 }
 
-// Instância única para toda a aplicação (Singleton)
-export const StateManager = new StateManagerClass();
+// Instância global acessível por todos os scripts
+window.StateManager = new StateManagerClass();
+
