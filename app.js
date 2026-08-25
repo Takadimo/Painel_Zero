@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 1)
+ * Painel de Estudos de Piano & Acordeon (Versão 2)
  */
 
 let timerInterval = null;
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos V1 inicializado.");
+    console.log("[App] Painel de Estudos V2 inicializado.");
 });
 
 /**
@@ -35,6 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function renderApp(state) {
     renderTabs(state.activeTab);
+    
+    // Renderiza a Sessão Guiada 1-Clique
+    if (window.SessionPlayer) {
+        window.SessionPlayer.renderUI(state);
+    }
+
     renderColdAudits(state);
     renderDailySummary(state);
     renderRepertoireView(state);
@@ -54,12 +60,21 @@ function renderTabs(activeTab) {
 }
 
 /**
- * Renderiza o Card de Auditoria a Frio (Bloco A) na Aba Hoje
+ * Renderiza o Card de Auditoria a Frio Avulsa na Aba Hoje
  */
 function renderColdAudits(state) {
     const container = document.getElementById("auditListContainer");
     const badgeCount = document.getElementById("auditBadgeCount");
+    const cardEl = document.getElementById("coldAuditCard");
     if (!container) return;
+
+    // Se uma sessão guiada estiver ativa, esconde o card avulso para não poluir
+    if (state.sessionState && state.sessionState.guidedActive) {
+        if (cardEl) cardEl.style.display = "none";
+        return;
+    } else {
+        if (cardEl) cardEl.style.display = "block";
+    }
 
     const dueAudits = window.NeuroEngine ? window.NeuroEngine.getDueColdAudits() : [];
     
@@ -70,8 +85,8 @@ function renderColdAudits(state) {
 
     if (dueAudits.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.85rem;">
-                ✨ Nenhuma auditoria a frio pendente para hoje! Sua memória motora está em dia.
+            <div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 0.82rem;">
+                ✨ Todas as auditorias a frio de hoje estão concluídas!
             </div>
         `;
         return;
@@ -183,24 +198,37 @@ function setupGlobalEventListeners() {
                 }
                 break;
 
+            // Handlers da Sessão Guiada 1-Clique
+            case "start-guided-session":
+                if (window.SessionPlayer) window.SessionPlayer.startSession();
+                break;
+
+            case "next-guided-block":
+                if (window.SessionPlayer) window.SessionPlayer.nextBlock();
+                break;
+
+            case "prev-guided-block":
+                if (window.SessionPlayer) window.SessionPlayer.prevBlock();
+                break;
+
+            case "exit-guided-session":
+                if (window.SessionPlayer) window.SessionPlayer.exitSession();
+                break;
+
+            // Handlers de Auditoria a Frio
             case "audit-hit":
-                if (window.NeuroEngine) {
-                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "hit");
-                }
+                if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "hit");
                 break;
 
             case "audit-slip":
-                if (window.NeuroEngine) {
-                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "slip");
-                }
+                if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "slip");
                 break;
 
             case "audit-miss":
-                if (window.NeuroEngine) {
-                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "miss");
-                }
+                if (window.NeuroEngine) window.NeuroEngine.processAuditResult(pieceId, trechoId, "miss");
                 break;
 
+            // Cronômetro Livre
             case "start-timer":
                 startFocusTimer();
                 break;
@@ -213,6 +241,7 @@ function setupGlobalEventListeners() {
                 resetFocusTimer();
                 break;
 
+            // Backup & Configurações
             case "export-savegame":
                 exportSavegameToClipboard();
                 break;
@@ -227,9 +256,6 @@ function setupGlobalEventListeners() {
     });
 }
 
-/**
- * Controle do Cronômetro de Foco
- */
 function startFocusTimer() {
     if (isTimerRunning) return;
     isTimerRunning = true;
@@ -274,9 +300,6 @@ function updateTimerDisplay() {
     display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-/**
- * Exporta o Savegame JSON
- */
 function exportSavegameToClipboard() {
     const jsonStr = window.StateManager.exportSavegame();
     navigator.clipboard.writeText(jsonStr).then(() => {
