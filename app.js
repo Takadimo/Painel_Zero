@@ -1,6 +1,6 @@
 /**
  * app.js - Camada de Controle de UI e Despachante de Eventos
- * Painel de Estudos de Piano & Acordeon (Versão 0)
+ * Painel de Estudos de Piano & Acordeon (Versão 1)
  */
 
 let timerInterval = null;
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Inicializa o Estado Global
     const state = window.StateManager.init();
     
-    // 2. Inicializa o Repertório se necessário
+    // 2. Inicializa o Repertório
     if (window.RepertoireManager) {
         window.RepertoireManager.initRepertoire();
     }
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Primeira renderização da aplicação
     renderApp(state);
-    console.log("[App] Painel de Estudos inicializado com sucesso.");
+    console.log("[App] Painel de Estudos V1 inicializado.");
 });
 
 /**
@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function renderApp(state) {
     renderTabs(state.activeTab);
+    renderColdAudits(state);
     renderDailySummary(state);
     renderRepertoireView(state);
 }
@@ -43,24 +44,73 @@ function renderApp(state) {
  * Alterna a exibição das abas
  */
 function renderTabs(activeTab) {
-    // Atualiza botões
     document.querySelectorAll(".tab-btn").forEach(btn => {
-        const tab = btn.dataset.tab;
-        if (tab === activeTab) {
-            btn.classList.add("active");
-        } else {
-            btn.classList.remove("active");
-        }
+        btn.classList.toggle("active", btn.dataset.tab === activeTab);
     });
 
-    // Atualiza seções
     document.querySelectorAll(".section").forEach(sec => {
-        if (sec.id === `section-${activeTab}`) {
-            sec.classList.add("active");
-        } else {
-            sec.classList.remove("active");
-        }
+        sec.classList.toggle("active", sec.id === `section-${activeTab}`);
     });
+}
+
+/**
+ * Renderiza o Card de Auditoria a Frio (Bloco A) na Aba Hoje
+ */
+function renderColdAudits(state) {
+    const container = document.getElementById("auditListContainer");
+    const badgeCount = document.getElementById("auditBadgeCount");
+    if (!container) return;
+
+    const dueAudits = window.NeuroEngine ? window.NeuroEngine.getDueColdAudits() : [];
+    
+    if (badgeCount) {
+        badgeCount.textContent = `${dueAudits.length} pendentes`;
+        badgeCount.className = `badge ${dueAudits.length > 0 ? 'warn' : 'info'}`;
+    }
+
+    if (dueAudits.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.85rem;">
+                ✨ Nenhuma auditoria a frio pendente para hoje! Sua memória motora está em dia.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = dueAudits.map(item => `
+        <div class="audit-item">
+            <div class="audit-header">
+                <div>
+                    <span class="audit-title">${item.pieceTitle}</span>
+                    <span class="box-badge box-${item.trecho.box}">Caixa ${item.trecho.box}</span>
+                </div>
+                <span class="audit-meta">IFM: <strong>${item.ifm}</strong> | Comp. ${item.trecho.compassos}</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
+                Trecho: <strong>${item.trecho.label}</strong> (1º tiro sem aquecimento)
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn-audit btn-audit-hit" 
+                        data-action="audit-hit" 
+                        data-piece="${item.pieceId}" 
+                        data-trecho="${item.trecho.id}">
+                    🟢 Limpo (+15 XP)
+                </button>
+                <button class="btn-audit btn-audit-slip" 
+                        data-action="audit-slip" 
+                        data-piece="${item.pieceId}" 
+                        data-trecho="${item.trecho.id}">
+                    🟡 Escorregão
+                </button>
+                <button class="btn-audit btn-audit-miss" 
+                        data-action="audit-miss" 
+                        data-piece="${item.pieceId}" 
+                        data-trecho="${item.trecho.id}">
+                    🔴 Travou
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
 /**
@@ -77,7 +127,7 @@ function renderDailySummary(state) {
 }
 
 /**
- * Renderiza a lista de peças ativas e seus microblocos na Aba Peças
+ * Renderiza a lista de peças e microblocos na Aba Peças
  */
 function renderRepertoireView(state) {
     const listEl = document.getElementById("repertoireList");
@@ -98,9 +148,15 @@ function renderRepertoireView(state) {
             </div>
             <div style="margin-top: 8px;">
                 ${(piece.trechos || []).map(t => `
-                    <span class="microblock-tag" title="Caixa ${t.box} Leitner">
-                        ${t.label} (Cx ${t.box})
-                    </span>
+                    <div class="trecho-row">
+                        <div>
+                            <strong>${t.label}</strong> (Comp. ${t.compassos})
+                            <span class="box-badge box-${t.box}" style="margin-left: 4px;">Caixa ${t.box}</span>
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 0.72rem;">
+                            Histórico: ${t.lifetimeHits || 0}/${t.lifetimeAttempts || 0} (${t.slips || 0} slips)
+                        </div>
+                    </div>
                 `).join('')}
             </div>
         </div>
@@ -116,12 +172,32 @@ function setupGlobalEventListeners() {
         if (!btn) return;
 
         const action = btn.dataset.action;
+        const pieceId = btn.dataset.piece;
+        const trechoId = btn.dataset.trecho;
 
         switch (action) {
             case "switch-tab":
                 const targetTab = btn.dataset.tab;
                 if (targetTab) {
                     window.StateManager.setState({ activeTab: targetTab }, "SWITCH_TAB");
+                }
+                break;
+
+            case "audit-hit":
+                if (window.NeuroEngine) {
+                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "hit");
+                }
+                break;
+
+            case "audit-slip":
+                if (window.NeuroEngine) {
+                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "slip");
+                }
+                break;
+
+            case "audit-miss":
+                if (window.NeuroEngine) {
+                    window.NeuroEngine.processAuditResult(pieceId, trechoId, "miss");
                 }
                 break;
 
@@ -162,7 +238,6 @@ function startFocusTimer() {
         timerSeconds++;
         updateTimerDisplay();
 
-        // A cada 60 segundos completos, credita 1 minuto no dailyStats
         if (timerSeconds % 60 === 0) {
             window.StateManager.setState(prev => ({
                 dailyStats: {
@@ -200,14 +275,13 @@ function updateTimerDisplay() {
 }
 
 /**
- * Exporta o Savegame JSON para a área de transferência
+ * Exporta o Savegame JSON
  */
 function exportSavegameToClipboard() {
     const jsonStr = window.StateManager.exportSavegame();
     navigator.clipboard.writeText(jsonStr).then(() => {
-        alert("Savegame JSON copiado para a área de transferência com sucesso!");
+        alert("Savegame JSON copiado para a área de transferência!");
     }).catch(err => {
-        console.error("Erro ao copiar Savegame:", err);
         prompt("Copie seu Savegame manualmente abaixo:", jsonStr);
     });
 }
